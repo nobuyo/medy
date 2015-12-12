@@ -1,20 +1,21 @@
-#!/bin/bash
-# medy: package manager for cygwin
-#
+#!/usr/bin/env bash
+
+# apt-cyg: install tool for cygwin similar to debian apt-get
+
 # The MIT License (MIT)
-#
-# Copyright (c) 2015 nobuyo
-#
+# 
+# Copyright (c) 2013 Trans-code Design
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,6 +23,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# 
 
 # ._ _  _  _|   
 # | | |(/_(_|\/ 
@@ -49,17 +51,17 @@ function version {
 
 function warn {
   # color:yellow
-  echo -e " \033[33mWarning:\033[m" "$*"
+  echo -e "\033[33mWarning:\033[m" "$*"
 }
 
 function error {
   # color:red
-  echo -e " \033[31mError  :\033[m" "$*"
+  echo -e "\033[31mError  :\033[m" "$*"
 }
 
 function success {
   # color:green
-  echo -e " \033[32mSuccess:\033[m" "$*"
+  echo -e "\033[32mSuccess:\033[m" "$*"
 }
 
 function newline {
@@ -266,7 +268,12 @@ function info {
   sed -e 's/category: //g' -e 's/sdesc: //g' |\
   sed  -e 's/"//g' -e 's/requires: //g' -e 's/version: //g' -e 's/\\n//g')"
 
-  info_desc="$(echo "$info" | head -n -3)"
+  if [ "$info" == "" ]; then
+    warn "Unable to find $1"
+    return
+  fi
+
+  info_desc="$(echo "$info" | head -n -3 | tail -n +2)"
   info_version="$(echo "$info" | tail -1)"
   info_require="$(echo "$info" | tail -2 | head -1)"
   info_category="$(echo "$info" | tail -3 | head -1)"
@@ -281,10 +288,194 @@ function info {
   echo "$info_require"
   echo -e "\033[35;4m  Version \033[m"""
   echo "$info_version"
+  
+  echo -e "\033[35;4m  Status \033[m"""
+  grep "$1" /etc/setup/installed.db &> /dev/null
+  if [ $? -eq 0 ]; then
+    echo "Installed"
+  else
+    echo "Not installed"
+  fi
+}
+
+RESUME_INSTALL=1
+
+function install () {
+
+    local pkg
+    local script
+
+    checkpackages "$@"
+    findworkspace
+    noupdate=1
+    getsetup
+    echo
+    
+    for pkg do
+      local already="$(grep -c "^$pkg " /etc/setup/installed.db)"
+      if [ $already -ge 1 ] && [ -z $force ]; then
+        warning "Package $pkg is already installed, skipping"
+        continue
+      fi
+      CURRENT="${CURRENT[@]} $pkg"
+    done
+
+    [ -f /tmp/medy_packages ] && {
+      warning "Interrupted resolving deps detected, ignoring."
+      rm /tmp/medy-*  
+    }
+
+    echo -n "Resolving dependencies.."
+    
+    resolve_deps
+        
+    RESUME_INSTALL=0
+    resume-install
+}
+
+function resolve_deps() {
+
+    while true ; do
+
+    echo -n "."
+    pkgs=${CURRENT[@]}
+    CURRENT=""
+    hasdeps=0
+
+        
+    for pkg in $pkgs; do
+
+      [ -f /tmp/medy_packages ] && {
+        local installing="$( grep -c "$pkg" /tmp/medy_packages)"
+        [ $installing = 0 ] || continue
+      }
+
+      # look for package and save desc file
+ 
+      mkdir -p "release/$pkg"
+      awk > "release/$pkg/desc" -v package=`echo $pkg` \
+        'BEGIN{RS="\n\n@ "; FS="\n"} {if ($1 == package) {desc = $0; px++}} \
+        END {if (px == 1 && desc != "") print desc; else print "Package not found"}' \
+        setup.ini
+      local desc="$(< "release/$pkg/desc")"
+      if [ "$desc" = "Package not found" ]; then
+        echo; error "Package $pkg not found or ambiguous name, exiting"
+        rm -r "release/$pkg"
+        rm /tmp/medy-* 2> /dev/null
+        exit 1
+      fi
+     
+      # queue current package
+
+      local install="$(awk '/^install: / { print $2; exit }' "release/$pkg/desc")"
+      echo "$mirror/$install" >> /tmp/medy-downloads
+      echo "  dir=release/$pkg" >> /tmp/medy-downloads
+      echo $pkg >> /tmp/medy_packages
+      hasdeps=1
+      
+      # resolve dependencies
+
+      local requires="$(grep "^requires: " "release/$pkg/desc" | sed -re 's/^requires: *(.*[^ ]) */\1/g' -e 's/ +/ /g')"
+
+      local warn=0
+      
+      if [ -n "$requires" ]; then
+        for package in $requires; do
+          local already="$(grep -c "$package " /etc/setup/installed.db)" 
+          if [ $already = 0 ]; then
+            CURRENT=( ${CURRENT[@]} $package )
+          fi
+        done
+      fi
+
+      if [ -z "$install" ]; then
+        error "Could not find \"install\" in package description: obsolete package?"
+        rm /tmp/medy-*
+        exit 1
+      fi
+    done
+    
+    # tailcall
+
+    [ $hasdeps = 0 ] && break;
+    done
+}
+
+function resume-install() {
+
+    echo; echo
+    if [ ! -f "/tmp/medy_packages" ]; then
+      echo "Nothing to install, exiting"
+      exit 0
+    fi
+      
+    echo "Following packages will be installed:"
+    for p in $( cat /tmp/medy_packages ); do
+      echo -n $p " "
+    done
+    echo; ask_user "Do you wish to continue?" || quit
+
+    [ $RESUME_INSTALL = 0 ] || findworkspace
+    
+    # download all
+    
+    echo "Start downloading..."
+    ${ARIA2C[@]} --input-file /tmp/medy-downloads \
+                 `[ $(current_cygarch) = "x86" ] || echo "--deferred-input"` \
+                 -j $maxcount || {
+      echo -e "\e[1;34mInterrupted:\e[0m To resume installing, run \"medy resume-install\" ."
+      exit 1
+    }
+
+    # unpack all
+
+    for pkg in $( cat /tmp/medy_packages ); do
+    
+      install="$(awk '/^install: / { print $2; exit }' "release/$pkg/desc")"
+      file="$(basename "$install")"
+      cd "release/$pkg"
+      
+      # check the sha512
+
+      while true; do
+        local digest="$(awk '/^install: / { print $4; exit }' "desc")"
+        local digactual="$(sha512sum $file | awk '{print $1}')"
+        if [ "$digest" != "$digactual" ]; then
+          error "SHA512 sum did not match, retry downloading..."
+          aria2c $mirror/$install
+        else break; fi
+      done
+      
+      echo "Unpacking: $pkg"
+      tar > "/etc/setup/$pkg.lst" xvf "$file" -C /
+      gzip -f "/etc/setup/$pkg.lst"
+      cd ../..
+    
+      # update the package database
+
+      awk > /tmp/awk.$$ -v pkg="$pkg" -v bz=$file \
+        '{if (ins != 1 && pkg < $1) {print pkg " " bz " 0"; ins=1}; print $0} \
+        END{if (ins != 1) print pkg " " bz " 0"}' \
+        /etc/setup/installed.db
+      mv /etc/setup/installed.db /etc/setup/installed.db-save
+      mv /tmp/awk.$$ /etc/setup/installed.db
+    done
+    
+    # run all postinstall scripts
+    
+    local pis="$(ls /etc/postinstall/*.sh 2>/dev/null | wc -l)"
+    if [ $pis -gt 0 ]; then
+      echo Running postinstall scripts...
+      for script in /etc/postinstall/*.sh; do
+        $script
+        mv $script $script.done
+      done
+    fi
+    quit
 
 }
 
+
+
 establish_lab
-info git
-
-
+info curl
