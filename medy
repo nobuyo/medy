@@ -65,6 +65,8 @@ function establish_lab {
 
 	if [ -e /etc/setup/last-mirror ]; then
 		mirror="$(head -1 /etc/setup/last-mirror)"
+	fi
+	mirror="$()"
 
 	elif [ -e /etc/setup/setup.rc ]; then
 
