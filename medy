@@ -27,47 +27,136 @@
 # | | |(/_(_|\/ 
 #            /  
 
-medy_logo='
-._ _  _  _|   
-| | |(/_(_|\/ 
-           /  
-'
+medy_logo="
+  ._ _  _  _|   
+  | | |(/_(_|\/ 
+             /  
+"
 
-function usage() {
-	echo "medy: Install (or build) and remove Cygwin package"
+function usage {
+  echo "medy: Install (or build) and remove Cygwin package"
 }
 
-function version() {
-	echo "$medy_logo"
-	echo "medy 0.01"
-	echo "Written by nobuyo"
-	echo ""
-	echo "Copyright (c) 2015 nobuyo.  Released under the MIT license"
+function version {
+  echo "$medy_logo"
+  echo "  medy version 0.01"
+  echo "  Written by nobuyo"
+  echo "  Copyright (c) 2015 nobuyo.  Released under the MIT license"
 }
 
-function warn() {
-	echo -e " \033[33mWarning:\033[m" "$1"
+function warn {
+  # color:yellow
+  echo -e " \033[33mWarning:\033[m" "$*"
 }
 
-function error() {
-	echo -e " \033[31mError  :\033[m" "$1"
+function error {
+  # color:red
+  echo -e " \033[31mError  :\033[m" "$*"
 }
 
-function success() {
-	echo -e " \033[32mSuccess:\033[m" "$1"
+function success {
+  # color:green
+  echo -e " \033[32mSuccess:\033[m" "$*"
 }
 
-function newline() {
-	echo ""
+function newline {
+  echo ""
+}
+
+function where_mirror {
+  echo "Mirror server is $1"
+}
+
+function where_dir {
+  echo "Cache directory is $1"
+}
+
+function cygwin_arch {
+  arch | awk '{sub("i686", "x86"); print $0;}'
+}
+
+function encode_mirror_url {
+  echo "$1" | sed -e "s/:/%3a/g" -e "s:/:%2f:g"
+}
+
+function is_available {
+  which "$1" >/dev/null 2>&1
+  return $?
+}
+
+function get {
+  if is_available "wget"; then
+    command wget "$@"
+  elif is_available "curl"; then
+    command curl -O "${@:2}"
+  else
+    warn "wget (curl) not installed."
+  fi
 }
 
 function establish_lab {
 
-	if [ -e /etc/setup/last-mirror ]; then
-		mirror="$(head -1 /etc/setup/last-mirror)"
-	fi
-	mirror="$()"
+  # get mirror and cache dir from local
 
-	elif [ -e /etc/setup/setup.rc ]; then
+  #default
+  mirror=ftp://ftp.iij.ad.jp/pub/cygwin/
+  cache=/medycache
+  arch="$(cygwin_arch)"
 
+  if [ -e /etc/setup/last-mirror ]; then
+    mirror="$(head -1 /etc/setup/last-mirror)"
+  elif [ -e /etc/setup/setup.rc ]; then
+    mirror="$(awk '/last-mirror/ {getline; print $1}' /etc/setup/setup.rc)"
+  fi
+  
+  dir="$(encode_mirror_url "$mirror/")"
+
+  if [ -e /etc/setup/last-cache ]; then
+    cache="$(cygpath -au "$(head -1 /etc/setup/last-mirror)")"    
+  elif [ -e /etc/setup/setup.rc ]; then
+    cache="$(cygpath -au "$(awk '/last-cache/ {getline; print $1}' /etc/setup/setup.rc)")"
+  fi
+  
+
+  where_mirror $mirror
+  where_dir $cache
+
+  mkdir -p "$cache/$dir/$arch"
+  cd "$cache/$dir/$arch"
+  if [ -e setup.ini ]; then
+    return 0
+  else
+    get_setup
+    return 1
+  fi
 }
+
+function get_setup {
+  touch setup.ini
+  mv setup.ini setup.ini-save
+  get -N /$arch/setup.bz2
+  if [ -e setup.bz2 ]; then
+    bunzip2 setup.bz2
+    mv setup setup.ini
+    success "Updated setup.ini"
+  else
+    error "Updateing setup.ini, reverting"
+    mv setup.ini-save setup.ini
+  fi
+}
+
+function update {
+  if establish_lab; then
+    get_setup
+  fi
+}
+
+function prescription {
+  
+}
+
+
+
+
+version
+get
