@@ -257,23 +257,30 @@ function search {
 }
 
 function info {
-  echo -ne "\033[35;4m  Infomation \033[m"":"
 
-  # grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
-  # sed -e 's/^@\s//g' |\
-  # grep -v 'ldesc\|install:\|source:' |\
-  # sed '/prev/,+2d' |\
-  # sed -e 's/\.\s/.\n/g' |\
-  # sed -e 's/sdesc/Description/g' -e 's/:/:\n/g' -e 's/"//g'
-
-  grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
+  info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
   grep -v 'ldesc\|install:\|source:' |\
   sed '/prev/,+2d' |\
   # sed -e 's/\.\s/.\n/g' -e 's/category:/@/g' |\
-  sed -e 's/category:/@/g'|\
-  sed -e 's/sdesc:/@/g' -e 's/"//g' -e 's/requires:/@/g' -e 's/version:/@/g' > ~/medy.txt
+  sed -e 's/category: //g' -e 's/sdesc: //g' |\
+  sed  -e 's/"//g' -e 's/requires: //g' -e 's/version: //g' -e 's/\\n//g')"
 
+  info_desc="$(echo "$info" | head -n -3)"
+  info_version="$(echo "$info" | tail -1)"
+  info_require="$(echo "$info" | tail -2 | head -1)"
+  info_category="$(echo "$info" | tail -3 | head -1)"
+
+  echo -e "\033[35;4m  Infomation \033[m"
+  echo "$1"
+  echo -e "\033[35;4m  Description \033[m"""
+  echo "$info_desc"
+  echo -e "\033[35;4m  Category \033[m"""
+  echo "$info_category"
+  echo -e "\033[35;4m  Requires \033[m"""""
+  echo "$info_require"
+  echo -e "\033[35;4m  Version \033[m"""
+  echo "$info_version"
 
 }
 
