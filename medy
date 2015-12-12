@@ -266,16 +266,14 @@ function info {
   # sed -e 's/\.\s/.\n/g' |\
   # sed -e 's/sdesc/Description/g' -e 's/:/:\n/g' -e 's/"//g'
 
-  info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
+  grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
   grep -v 'ldesc\|install:\|source:' |\
   sed '/prev/,+2d' |\
   # sed -e 's/\.\s/.\n/g' -e 's/category:/@/g' |\
   sed -e 's/category:/@/g'|\
-  sed -e 's/sdesc:/@/g' -e 's/"//g' -e 's/requires:/@/g' -e 's/version:/@/g')"
+  sed -e 's/sdesc:/@/g' -e 's/"//g' -e 's/requires:/@/g' -e 's/version:/@/g' > ~/medy.txt
 
-  echo "$info" | awk -F'@' '{print $1}'
-  # echo "$info"
 
 }
 
