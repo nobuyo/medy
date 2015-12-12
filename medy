@@ -37,13 +37,25 @@ lab_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
 
 function usage {
   echo "medy: Install (or build) and remove Cygwin package"
+  echo "  \"medy install <package names>\" to install packages"
+  echo "  \"medy resume-install\"          to resume interrupted installing"
+  echo "  \"medy remove <package names>\"  to remove packages"
+  echo "  \"medy update\"                  to update setup.ini"
+  echo "  \"medy list\"                    to show installed packages"
+  echo "  \"medy search <patterns>\"       to find packages"
+  echo "  \"medy info <package name>\"     to show package infomation"
+  echo "  \"medy upgrade-self\"            to upgrade medy"
+  echo ""
+  echo "Options:"
+  echo "  --force               : force install/remove/fetch trustedkeys"
+  echo "  --mirror, -m <url>    : set mirror server"
+  echo "  --help"
+  echo "  --version"
 }
 
 function version {
   echo "$medy_logo"
   echo "  medy version 0.01"
-  echo "  Written by nobuyo"
-  echo "  Copyright (c) 2015 nobuyo.  Released under the MIT license"
 }
 
 function warn {
@@ -160,13 +172,12 @@ function get_setup {
   fi
 }
 
-function update_setup {
-  if set_lab; then
-    get_setup
-  fi
+function update {
+  set_lab
+  get_setup
 }
 
-function upgrade_self {
+function upgrade-self {
   mv $medy $lab_dir/medy.orig
   get -Oq "https://raw.githubusercontent.com/nobuyo/medy/master/medy" -P /lab_dir
   if [ $? -ne 0 ]; then
@@ -186,9 +197,6 @@ function help {
 OPT_FILES=()
 SUBCOMMAND=""
 force=""
-YES_TO_ALL=false
-file_alloc=1
-maxcount=5
 INITIAL_ARGS=( "$@" )
 ARGS=()
 while [ $# -gt 0 ]; do
