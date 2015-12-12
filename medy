@@ -33,6 +33,9 @@ medy_logo="
              /  
 "
 
+medy=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)/$(basename $0)
+lab_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
+
 function usage {
   echo "medy: Install (or build) and remove Cygwin package"
 }
@@ -84,13 +87,20 @@ function is_available {
   return $?
 }
 
+function checkpackages {
+  if [ $# -eq 0 ]; then
+    echo Nothing to do, exiting
+    exit 0
+  fi
+}
+
 function get {
   if is_available "wget"; then
-    command wget "$@"
-  elif is_available "curl"; then
-    command curl -O "${@:2}"
+    command wget "$@" &>/dev/null
+  # elif is_available "curl"; then
+  #   command curl -O "${@:2}"
   else
-    warn "wget (curl) not installed."
+    warn "wget not installed."
   fi
 }
 
@@ -99,7 +109,7 @@ function establish_lab {
   # get mirror and cache dir from local
 
   #default
-  mirror=ftp://ftp.iij.ad.jp/pub/cygwin/
+  mirror=ftp://ftp.iij.ad.jp/pub/cygwin
   cache=/medycache
   arch="$(cygwin_arch)"
 
@@ -131,10 +141,12 @@ function establish_lab {
   fi
 }
 
+
+
 function get_setup {
   touch setup.ini
   mv setup.ini setup.ini-save
-  get -N /$arch/setup.bz2
+  get -N $mirror/$arch/setup.bz2
   if [ -e setup.bz2 ]; then
     bunzip2 setup.bz2
     mv setup setup.ini
@@ -145,18 +157,129 @@ function get_setup {
   fi
 }
 
-function update {
+function update_setup {
   if establish_lab; then
     get_setup
   fi
 }
 
-function prescription {
-  
+function upgrade_self {
+  mv $medy $lab_dir/medy.orig
+  get -Oq "https://raw.githubusercontent.com/nobuyo/medy/master/medy" -P /lab_dir
+  if [ $? -ne 0 ]; then
+    error "medy Could not found, reverting"
+    $lab_dir/medy.orig $medy
+  fi
+
+  chmod 775 $medy
+  success "Updated medy"
+}
+
+function help {
+  usage
 }
 
 
+OPT_FILES=()
+SUBCOMMAND=""
+force=""
+YES_TO_ALL=false
+file_alloc=1
+maxcount=5
+INITIAL_ARGS=( "$@" )
+ARGS=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+
+    --force)
+      force=1
+      shift
+    ;;
+
+    --mirror|-m)
+      echo "${2%/}/" > /etc/setup/last-mirror
+      shift ; shift
+    ;;
+
+    --help)
+      usage
+      exit 0
+    ;;
+
+    --version)
+      version
+      exit 0
+    ;;
+
+    *)
+      if [ -z "$SUBCOMMAND" ]; then
+        SUBCOMMAND="$1"
+      else
+        ARGS+=( "$1" )
+      fi
+      shift
+
+    ;;
+
+  esac
+done
+
+for file in "${OPT_FILES[@]}"; do
+  if [ -f "$file" ]; then
+    readarray -t -O ${#ARGS[@]} ARGS < "$file"
+  else
+    warning "File $file not found, skipping"
+  fi
+done
+
+function list {
+    echo 1>&2 The installed packages as follows:
+    awk '/[^ ]+ [^ ]+ 0/ {print $1}' /etc/setup/installed.db
+}
+
+function search {
+  local package
+
+  checkpackages "$@"
+  establish_lab
+  get_setup
+
+    for pkg do
+      echo ""
+      echo "Searching for installed packages matching $pkg:"
+      awk '/[^ ]+ [^ ]+ 0/ {if ($1 ~ query) print $1}' query="$pkg" /etc/setup/installed.db
+      echo ""
+      echo "Searching for installable packages matching $pkg:"
+      awk -v query="$pkg" \
+        'BEGIN{RS="\n\n@ "; FS="\n"; ORS="\n"} {if ($1 ~ query) {print $1}}' \
+        setup.ini
+    done
+}
+
+function info {
+  echo -ne "\033[35;4m  Infomation \033[m"":"
+
+  # grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
+  # sed -e 's/^@\s//g' |\
+  # grep -v 'ldesc\|install:\|source:' |\
+  # sed '/prev/,+2d' |\
+  # sed -e 's/\.\s/.\n/g' |\
+  # sed -e 's/sdesc/Description/g' -e 's/:/:\n/g' -e 's/"//g'
+
+  info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
+  sed -e 's/^@\s//g' |\
+  grep -v 'ldesc\|install:\|source:' |\
+  sed '/prev/,+2d' |\
+  # sed -e 's/\.\s/.\n/g' -e 's/category:/@/g' |\
+  sed -e 's/category:/@/g'|\
+  sed -e 's/sdesc:/@/g' -e 's/"//g' -e 's/requires:/@/g' -e 's/version:/@/g')"
+
+  echo "$info" | awk -F'@' '{print $1}'
+  # echo "$info"
+
+}
+
+establish_lab
+info git
 
 
-version
-get
