@@ -23,11 +23,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-# 
-
-# ._ _  _  _|   
-# | | |(/_(_|\/ 
-#            /  
+#
 
 medy_logo="
   ._ _  _  _|   
@@ -37,6 +33,7 @@ medy_logo="
 
 medy=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)/$(basename $0)
 lab_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
+
 
 function usage {
   echo "medy: Install (or build) and remove Cygwin package"
@@ -56,7 +53,7 @@ function warn {
 
 function error {
   # color:red
-  echo -e "\033[31mError  :\033[m" "$*"
+  echo -e "\033[31mError:\033[m" "$*"
 }
 
 function success {
@@ -109,7 +106,6 @@ function get {
 function establish_lab {
 
   # get mirror and cache dir from local
-
   #default
   mirror=ftp://ftp.iij.ad.jp/pub/cygwin
   cache=/medycache
@@ -128,8 +124,13 @@ function establish_lab {
   elif [ -e /etc/setup/setup.rc ]; then
     cache="$(cygpath -au "$(awk '/last-cache/ {getline; print $1}' /etc/setup/setup.rc)")"
   fi
-  
 
+}
+
+function set_lab {
+
+  establish_lab
+  
   where_mirror $mirror
   where_dir $cache
 
@@ -160,7 +161,7 @@ function get_setup {
 }
 
 function update_setup {
-  if establish_lab; then
+  if set_lab; then
     get_setup
   fi
 }
@@ -248,10 +249,11 @@ function search {
 
     for pkg do
       echo ""
-      echo "Searching for installed packages matching $pkg:"
+      echo "Searching..."
+      echo "from installed packages matching $pkg:"
       awk '/[^ ]+ [^ ]+ 0/ {if ($1 ~ query) print $1}' query="$pkg" /etc/setup/installed.db
       echo ""
-      echo "Searching for installable packages matching $pkg:"
+      echo "from installable packages matching $pkg:"
       awk -v query="$pkg" \
         'BEGIN{RS="\n\n@ "; FS="\n"; ORS="\n"} {if ($1 ~ query) {print $1}}' \
         setup.ini
@@ -259,6 +261,8 @@ function search {
 }
 
 function info {
+
+  establish_lab
 
   info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
@@ -306,7 +310,7 @@ function install () {
     local script
 
     checkpackages "$@"
-    findworkspace
+    establish_lab
     noupdate=1
     getsetup
     echo
@@ -415,7 +419,7 @@ function resume-install() {
     done
     echo; ask_user "Do you wish to continue?" || quit
 
-    [ $RESUME_INSTALL = 0 ] || findworkspace
+    [ $RESUME_INSTALL = 0 ] || establish_lab
     
     # download all
     
@@ -475,7 +479,124 @@ function resume-install() {
 
 }
 
+function quit()
+{
+    echo "Removing tmp files..."
+    rm /tmp/medy_*
+    echo Done.
+    exit
+}
 
+function remove()
+{
+    local pkg
+    local req
+    valid=0
 
-establish_lab
-info curl
+    establish_lab
+    checkpackages "$@"
+
+    echo
+
+    CURRENT=""
+    for pkg in $@; do
+      if [ ! -e "/etc/setup/$pkg.lst.gz" -a -z "$force" ]; then
+        echo Package manifest missing, cannot remove $pkg.
+        continue
+      fi
+      valid=1
+      CURRENT=( ${CURRENT[@]} $pkg )
+    done
+
+    [ $valid = 1 ] || exit -1
+    remove-dep
+}
+
+function remove-dep()
+{
+    local pkg
+    REMOVE=""
+    do_remove=0
+
+    echo -n Resolving dependencies...
+
+    until [ -z $CURRENT ]; do
+
+      echo -n .
+      pkgs=${CURRENT[@]}
+      CURRENT=""
+
+      for p in $pkgs; do
+
+        already="$(grep -c "^$p " /etc/setup/installed.db)"
+        removing=`echo ${REMOVE[@]} | grep -c $p`
+        ([ $already -gt 0 ] && [ $removing = 0 ]) || continue
+
+        local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
+        for req in $dontremove; do
+            if [ "$p" = "$req" ]; then
+            echo; error "cyg-fast cannot remove package $p, exiting"
+            exit 1
+          fi
+        done
+      
+        REMOVE=( ${REMOVE[@]} $p )
+        do_remove=1
+
+        neededby=`awk '
+          /^@ / {
+            pn = $2
+          }
+          $0 ~ "^requires: .*"query {
+            print pn
+          }
+          ' query="$p" setup.ini`
+        
+        for npkg in $neededby; do
+          CURRENT=( ${CURRENT[@]} $npkg )
+        done
+
+      done
+    done
+
+    echo; echo
+
+    [ $do_remove = 1 ] || { echo Nothing to remove, exiting; exit; }
+
+    echo Following packages will be removed:
+    echo ${REMOVE[@]}
+    ask_user "Do you wish to continue?" || exit
+    
+    for pkg in ${REMOVE[@]}; do
+
+      echo Removing: $pkg
+
+      if [ -e "/etc/preremove/$pkg.sh" ]; then
+        "/etc/preremove/$pkg.sh"
+      fi
+      
+      gzip -cd "/etc/setup/$pkg.lst.gz" | awk '/[^\/]$/ {print "rm -f \"/" $0 "\""}' | sh
+      awk > /tmp/awk.$$ -v pkg="$pkg" '{if (pkg != $1) print $0}' /etc/setup/installed.db
+      rm -f "/etc/postinstall/$pkg.sh.done" "/etc/preremove/$pkg.sh" "/etc/setup/$pkg.lst.gz"
+      mv /etc/setup/installed.db /etc/setup/installed.db-save
+      mv /tmp/awk.$$ /etc/setup/installed.db
+    
+    done
+    echo Done.
+    exit
+}
+
+function invoke_subcommand ()
+{
+    local SUBCOMMAND="${@:1:1}"
+    local ARGS=( "${@:2}" )
+    local ACTION="${SUBCOMMAND:-help}"
+    if type "$ACTION" >& /dev/null; then
+      "$ACTION" "${ARGS[@]}"
+    else
+      error "unknown command: $SUBCOMMAND"
+      exit 1
+    fi
+}
+
+invoke_subcommand "$SUBCOMMAND" "${ARGS[@]}"
