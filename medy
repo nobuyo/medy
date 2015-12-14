@@ -25,7 +25,7 @@
 # THE SOFTWARE.
 #
 
-medy_logo="
+medy-logo="
   ._ _  _  _|   
   | | |(/_(_|\/ 
              /  
@@ -54,7 +54,7 @@ function usage {
 }
 
 function version {
-  echo "$medy_logo"
+  echo "$medy-logo"
   echo "  medy version 0.01"
 }
 
@@ -71,10 +71,6 @@ function error {
 function success {
   # color:green
   echo -e "\033[32mSuccess:\033[m" "$*"
-}
-
-function newline {
-  echo ""
 }
 
 function where_mirror {
@@ -249,11 +245,10 @@ function list {
 }
 
 function search {
-  local package
+  local pkg
 
   checkpackages "$@"
   establish_lab
-  get_setup
 
     for pkg do
       echo ""
@@ -270,7 +265,7 @@ function search {
 
 function info {
 
-  establish_lab
+  set_lab
 
   info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
@@ -290,18 +285,18 @@ function info {
   info_require="$(echo "$info" | tail -2 | head -1)"
   info_category="$(echo "$info" | tail -3 | head -1)"
 
-  echo -e "\033[35;4m  Infomation \033[m"
+  echo -e "\033[35;4m Infomation \033[m"
   echo "$1"
-  echo -e "\033[35;4m  Description \033[m"""
+  echo -e "\033[35;4m Description \033[m"""
   echo "$info_desc"
-  echo -e "\033[35;4m  Category \033[m"""
+  echo -e "\033[35;4m Category \033[m"""
   echo "$info_category"
-  echo -e "\033[35;4m  Requires \033[m"""""
+  echo -e "\033[35;4m Requires \033[m"""""
   echo "$info_require"
-  echo -e "\033[35;4m  Version \033[m"""
+  echo -e "\033[35;4m Version \033[m"""
   echo "$info_version"
   
-  echo -e "\033[35;4m  Status \033[m"""
+  echo -e "\033[35;4m Status \033[m"""
   grep "$1" /etc/setup/installed.db &> /dev/null
   if [ $? -eq 0 ]; then
     echo "Installed"
@@ -309,8 +304,6 @@ function info {
     echo "Not installed"
   fi
 }
-
-RESUME_INSTALL=1
 
 function install () {
 
@@ -332,12 +325,12 @@ function install () {
       CURRENT="${CURRENT[@]} $pkg"
     done
 
-    [ -f /tmp/medy_packages ] && {
-      warning "Interrupted resolving deps detected, ignoring."
-      rm /tmp/medy-*  
+    [ -f /tmp/medy-packages ] && {
+      warn "Interrupted resolving deps detected, ignoring."
+      rm /tmp/medy-*
     }
 
-    echo -n "Resolving dependencies.."
+    echo -n "Resolving dependencies..."
     
     resolve_deps
         
@@ -357,8 +350,8 @@ function resolve_deps() {
         
     for pkg in $pkgs; do
 
-      [ -f /tmp/medy_packages ] && {
-        local installing="$( grep -c "$pkg" /tmp/medy_packages)"
+      [ -f /tmp/medy-packages ] && {
+        local installing="$( grep -c "$pkg" /tmp/medy-packages)"
         [ $installing = 0 ] || continue
       }
 
@@ -382,7 +375,7 @@ function resolve_deps() {
       local install="$(awk '/^install: / { print $2; exit }' "release/$pkg/desc")"
       echo "$mirror/$install" >> /tmp/medy-downloads
       echo "  dir=release/$pkg" >> /tmp/medy-downloads
-      echo $pkg >> /tmp/medy_packages
+      echo $pkg >> /tmp/medy-packages
       hasdeps=1
       
       # resolve dependencies
@@ -413,35 +406,34 @@ function resolve_deps() {
     done
 }
 
-function resume-install() {
+function resume-install {
 
     echo; echo
-    if [ ! -f "/tmp/medy_packages" ]; then
+    if [ ! -f "/tmp/medy-packages" ]; then
       echo "Nothing to install, exiting"
       exit 0
     fi
       
     echo "Following packages will be installed:"
-    for p in $( cat /tmp/medy_packages ); do
+    for p in $( cat /tmp/medy-packages ); do
       echo -n $p " "
     done
     echo; ask_user "Do you wish to continue?" || quit
 
-    [ $RESUME_INSTALL = 0 ] || establish_lab
+    [ $RESUME_INSTALL = 0 ] || set_lab
     
     # download all
     
     echo "Start downloading..."
-    ${ARIA2C[@]} --input-file /tmp/medy-downloads \
-                 `[ $(current_cygarch) = "x86" ] || echo "--deferred-input"` \
-                 -j $maxcount || {
+    get -O "$(cat /tmp/medy-downloads)" || 
+    {
       echo -e "\e[1;34mInterrupted:\e[0m To resume installing, run \"medy resume-install\" ."
       exit 1
     }
 
     # unpack all
 
-    for pkg in $( cat /tmp/medy_packages ); do
+    for pkg in $( cat /tmp/medy-packages ); do
     
       install="$(awk '/^install: / { print $2; exit }' "release/$pkg/desc")"
       file="$(basename "$install")"
@@ -487,10 +479,11 @@ function resume-install() {
 
 }
 
+
 function quit()
 {
     echo "Removing tmp files..."
-    rm /tmp/medy_*
+    rm /tmp/medy-*
     echo Done.
     exit
 }
@@ -501,7 +494,7 @@ function remove()
     local req
     valid=0
 
-    establish_lab
+    set_lab
     checkpackages "$@"
 
     echo
