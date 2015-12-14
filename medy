@@ -25,7 +25,7 @@
 # THE SOFTWARE.
 #
 
-medy-logo="
+medylogo="
   ._ _  _  _|   
   | | |(/_(_|\/ 
              /  
@@ -33,7 +33,6 @@ medy-logo="
 
 medy=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)/$(basename $0)
 lab_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
-
 
 function usage {
   echo "medy: Install (or build) and remove Cygwin package"
@@ -54,7 +53,7 @@ function usage {
 }
 
 function version {
-  echo "$medy-logo"
+  echo "$medylogo"
   echo "  medy version 0.01"
 }
 
@@ -182,8 +181,10 @@ function help {
 }
 
 
+
 OPT_FILES=()
 SUBCOMMAND=""
+YES_TO_ALL=false
 force=""
 INITIAL_ARGS=( "$@" )
 ARGS=()
@@ -198,6 +199,11 @@ while [ $# -gt 0 ]; do
     --mirror|-m)
       echo "${2%/}/" > /etc/setup/last-mirror
       shift ; shift
+    ;;
+
+    --yes-to-all|-y)
+      YES_TO_ALL=1
+      shift
     ;;
 
     --help)
@@ -230,6 +236,24 @@ for file in "${OPT_FILES[@]}"; do
     warning "File $file not found, skipping"
   fi
 done
+
+function ask_user {
+  
+  while true; do
+    [ -n "$2" ] && { local pmt="$2"; local def=; }
+    [ -n "$2" ] || { local pmt="y/n";local def=; }
+    [ $YES_TO_ALL = 1 ] && { local RPY=Y;local def=Y; }
+    [ -z "$def" ] && { echo -ne "$1 ";read -p "[$pmt] " RPY; }
+    [ -z "$RPY" ] && { local RPY=$def; }
+    case "$RPY" in
+      Y*|y*) return 0 ;;
+      N*|n*) return 1 ;;
+         1*) return 0 ;;
+         2*) return 1 ;;
+    esac
+  done
+}
+
 
 function medy-list {
     echo 1>&2 The installed packages as follows:
@@ -470,7 +494,6 @@ function medy-resume-install {
     quit
 }
 
-
 function quit {
     echo "Removing tmp files..."
     rm /tmp/medy-*
@@ -581,6 +604,24 @@ function medy-uninstall {
 
 function medy-find {
   search "$@"
+}
+
+function check-upgrade {
+  IFS='
+'
+  for pkg in $(cat /etc/setup/installed.db);
+  do
+    name="$(awk -F' ' -v pkg="$pkg" '{print $1}' pkg)"
+    tarfile="$(awk -F' ' -v pkg="$pkg" '{print $2}' pkg)"
+
+    grep "$tarfile" 
+  done
+
+}
+
+function medy-doctor {
+  # check dependencies of installed packages
+  :
 }
 
 function invoke_subcommand {
