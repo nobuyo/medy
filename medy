@@ -176,7 +176,7 @@ function upgrade-self {
   success "Updated medy"
 }
 
-function help {
+function medy-help {
   usage
 }
 
