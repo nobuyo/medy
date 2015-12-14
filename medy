@@ -39,10 +39,10 @@ function usage {
   echo "medy: Install (or build) and remove Cygwin package"
   echo "  \"medy install <package names>\" to install packages"
   echo "  \"medy resume-install\"          to resume interrupted installing"
-  echo "  \"medy remove <package names>\"  to remove packages"
+  echo "  \"medy (remove|uninstall) <package names>\"  to remove packages"
   echo "  \"medy update\"                  to update setup.ini"
   echo "  \"medy list\"                    to show installed packages"
-  echo "  \"medy search <patterns>\"       to find packages"
+  echo "  \"medy (search|find) <patterns>\"       to find packages"
   echo "  \"medy info <package name>\"     to show package infomation"
   echo "  \"medy upgrade-self\"            to upgrade medy"
   echo ""
@@ -89,7 +89,7 @@ function encode_mirror_url {
   echo "$1" | sed -e "s/:/%3a/g" -e "s:/:%2f:g"
 }
 
-function is_available {
+function is-available {
   which "$1" >/dev/null 2>&1
   return $?
 }
@@ -102,16 +102,16 @@ function checkpackages {
 }
 
 function get {
-  if is_available "wget"; then
+  if is-available "wget"; then
     command wget "$@" &>/dev/null
-  # elif is_available "curl"; then
+  # elif is-available "curl"; then
   #   command curl -O "${@:2}"
   else
     warn "wget not installed."
   fi
 }
 
-function establish_lab {
+function setlab {
 
   # get mirror and cache dir from local
   #default
@@ -133,12 +133,6 @@ function establish_lab {
     cache="$(cygpath -au "$(awk '/last-cache/ {getline; print $1}' /etc/setup/setup.rc)")"
   fi
 
-}
-
-function set_lab {
-
-  establish_lab
-  
   where_mirror $mirror
   where_dir $cache
 
@@ -147,14 +141,12 @@ function set_lab {
   if [ -e setup.ini ]; then
     return 0
   else
-    get_setup
+    getsetup
     return 1
   fi
 }
 
-
-
-function get_setup {
+function getsetup {
   touch setup.ini
   mv setup.ini setup.ini-save
   get -N $mirror/$arch/setup.bz2
@@ -169,8 +161,8 @@ function get_setup {
 }
 
 function update {
-  set_lab
-  get_setup
+  setlab
+  getsetup
 }
 
 function upgrade-self {
@@ -239,12 +231,12 @@ for file in "${OPT_FILES[@]}"; do
   fi
 done
 
-function list {
+function medy-list {
     echo 1>&2 The installed packages as follows:
     awk '/[^ ]+ [^ ]+ 0/ {print $1}' /etc/setup/installed.db
 }
 
-function search {
+function medy-search {
   local pkg
 
   checkpackages "$@"
@@ -263,9 +255,9 @@ function search {
     done
 }
 
-function info {
+function medy-info {
 
-  set_lab
+  setlab
 
   info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
@@ -305,7 +297,7 @@ function info {
   fi
 }
 
-function install () {
+function medy-install {
 
     local pkg
     local script
@@ -335,10 +327,10 @@ function install () {
     resolve_deps
         
     RESUME_INSTALL=0
-    resume-install
+    medy-resume-install
 }
 
-function resolve_deps() {
+function resolve_deps {
 
     while true ; do
 
@@ -406,7 +398,7 @@ function resolve_deps() {
     done
 }
 
-function resume-install {
+function medy-resume-install {
 
     echo; echo
     if [ ! -f "/tmp/medy-packages" ]; then
@@ -420,7 +412,7 @@ function resume-install {
     done
     echo; ask_user "Do you wish to continue?" || quit
 
-    [ $RESUME_INSTALL = 0 ] || set_lab
+    [ $RESUME_INSTALL = 0 ] || setlab
     
     # download all
     
@@ -476,25 +468,22 @@ function resume-install {
       done
     fi
     quit
-
 }
 
 
-function quit()
-{
+function quit {
     echo "Removing tmp files..."
     rm /tmp/medy-*
     echo Done.
     exit
 }
 
-function remove()
-{
+function medy-remove {
     local pkg
     local req
     valid=0
 
-    set_lab
+    setlab
     checkpackages "$@"
 
     echo
@@ -513,8 +502,7 @@ function remove()
     remove-dep
 }
 
-function remove-dep()
-{
+function remove-dep {
     local pkg
     REMOVE=""
     do_remove=0
@@ -587,11 +575,19 @@ function remove-dep()
     exit
 }
 
-function invoke_subcommand ()
-{
+function medy-uninstall {
+  remove "$@"
+}
+
+function medy-find {
+  search "$@"
+}
+
+function invoke_subcommand {
+
     local SUBCOMMAND="${@:1:1}"
     local ARGS=( "${@:2}" )
-    local ACTION="${SUBCOMMAND:-help}"
+    local ACTION="medy-${SUBCOMMAND:-help}"
     if type "$ACTION" >& /dev/null; then
       "$ACTION" "${ARGS[@]}"
     else
