@@ -287,12 +287,11 @@ function medy-info {
   sed -e 's/^@\s//g' |\
   grep -v 'ldesc\|install:\|source:' |\
   sed '/prev/,+2d' |\
-  # sed -e 's/\.\s/.\n/g' -e 's/category:/@/g' |\
   sed -e 's/category: //g' -e 's/sdesc: //g' |\
   sed  -e 's/"//g' -e 's/requires: //g' -e 's/version: //g' -e 's/\\n//g')"
 
   if [ "$info" == "" ]; then
-    warn "Unable to find $1"
+    error "Unable to find $1"
     return
   fi
 
@@ -606,17 +605,33 @@ function medy-find {
   search "$@"
 }
 
-function check-upgrade {
-  IFS='
-'
-  for pkg in $(cat /etc/setup/installed.db);
+function medy-upgrade {
+
+  setlab
+  getsetup
+  target=()
+  archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | tail -n +2)"
+
+  echo -e "\033[36;4mChecking package update...\033[m"
+  for acv in $archive;
   do
-    name="$(awk -F' ' -v pkg="$pkg" '{print $1}' pkg)"
-    tarfile="$(awk -F' ' -v pkg="$pkg" '{print $2}' pkg)"
-
-    grep "$tarfile" 
+    pkgname="$(echo "$acv" | awk -F, '{print $1}')"
+    tarfile="$(echo "$acv" | awk -F, '{print $2}')"
+    tarbase="${tarfile%.*.*}"
+    tarcurrent="$(grep -wA15 "^@ $pkgname" $cache/$dir/$arch/setup.ini | sed '/prev/,$d' |\
+      grep 'install: ' | sed -e 's/install: //g' | awk '{print $1}')"
+    infocurrent="${tarcurrent##*/}"
+    tarcurrent="${infocurrent%.*.*}"
+    if [[ $tarcurrent != $tarbase ]]; then
+      echo "$tarbase => $tarcurrent"
+      target+="$pkgname " # do not delete space
+    fi
   done
+  echo; warn ask_user "\033[36mDo you wish upgrade?\033[m" || exit 1
 
+  medy-remove "{target[@]}"
+  medy-install "{target[@]}"
+  
 }
 
 function medy-doctor {
