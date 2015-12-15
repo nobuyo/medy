@@ -546,7 +546,7 @@ function remove-dep {
         local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
         for req in $dontremove; do
             if [ "$p" = "$req" ]; then
-            echo; error "cyg-fast cannot remove package $p, exiting"
+            echo; error "medy cannot remove package $p, exiting"
             exit 1
           fi
         done
@@ -609,28 +609,30 @@ function medy-upgrade {
 
   setlab
   getsetup
+
   target=()
   archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | tail -n +2)"
-
+  
   echo -e "\033[36;4mChecking package update...\033[m"
   for acv in $archive;
   do
     pkgname="$(echo "$acv" | awk -F, '{print $1}')"
     tarfile="$(echo "$acv" | awk -F, '{print $2}')"
     tarbase="${tarfile%.*.*}"
-    tarcurrent="$(grep -wA15 "^@ $pkgname" $cache/$dir/$arch/setup.ini | sed '/prev/,$d' |\
+    tarcurrent="$(grep -wA22 "^@ $pkgname" $cache/$dir/$arch/setup.ini | sed '/prev/,$d' |\
       grep 'install: ' | sed -e 's/install: //g' | awk '{print $1}')"
     infocurrent="${tarcurrent##*/}"
     tarcurrent="${infocurrent%.*.*}"
+
     if [[ $tarcurrent != $tarbase ]]; then
       echo "$tarbase => $tarcurrent"
-      target+="$pkgname " # do not delete space
+      target+="$pkgname "
     fi
   done
-  echo; warn ask_user "\033[36mDo you wish upgrade?\033[m" || exit 1
+  echo -e;  ask_user "\033[33mDo you wish continue?\033[m" || exit 1
 
-  medy-remove "{target[@]}"
-  medy-install "{target[@]}"
+  medy-remove "$(echo ${target[@]})"
+  medy-install "$(echo ${target[@]})"
   
 }
 
