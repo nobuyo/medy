@@ -52,24 +52,24 @@ function usage {
   echo "  --version"
 }
 
-function version {
+function medy-version {
   echo "$medylogo"
   echo "  medy version 0.01"
 }
 
 function warn {
   # color:yellow
-  echo -e "\033[33mWarning:\033[m" "$*"
+  echo -e "\033[33mWarning\033[m" "$*"
 }
 
 function error {
   # color:red
-  echo -e "\033[31mError:\033[m" "$*"
+  echo -e "\033[31mError\033[m" "$*"
 }
 
 function success {
   # color:green
-  echo -e "\033[32mSuccess:\033[m" "$*"
+  echo -e "\033[32mSuccess\033[m" "$*"
 }
 
 function where_mirror {
