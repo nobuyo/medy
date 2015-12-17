@@ -342,10 +342,10 @@ function medy-install {
     CURRENT="${CURRENT[@]} $pkg"
   done
 
-  [ -f /tmp/medy-packages ] && {
+  if [ -f /tmp/medy-packages ]; then
     warn "Interrupted resolving deps detected, ignoring."
     rm /tmp/medy-*
-  }
+  fi
 
   echo -n "Resolving dependencies..."
 
@@ -365,10 +365,10 @@ function resolve_deps {
 
     for pkg in $pkgs
     do
-      [ -f /tmp/medy-packages ] && {
+      if [ -f /tmp/medy-packages ]; then
         local installing="$( grep -c "$pkg" /tmp/medy-packages)"
         [ $installing = 0 ] || continue
-      }
+      fi
 
       # look for package and save desc file
 
