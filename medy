@@ -99,7 +99,8 @@ function where_dir {
 }
 
 function cygwin_arch {
-  arch | awk '{sub("i686", "x86"); print $0;}'
+  # arch | awk '{sub("i686", "x86"); print $0;}'
+  uname -m | awk '{sub("i686", "x86"); print $0;}'
 }
 
 function encode_mirror_url {
