@@ -545,6 +545,10 @@ function medy-remove {
     remove-dep
 }
 
+function remove-without-resolve-dep {
+  :
+}
+
 function remove-dep {
   local pkg
   REMOVE=""
