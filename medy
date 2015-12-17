@@ -420,7 +420,7 @@ function resolve_deps {
 
     # tailcall
 
-    [ $hasdeps = 0 ] && break;
+    [ $hasdeps = 0 ] && break
   done
 }
 
@@ -467,7 +467,8 @@ function medy-resume-install {
       if [ "$digest" != "$digactual" ]; then
         error "SHA512 sum did not match, retry downloading..."
         aria2c $mirror/$install
-      else break; fi
+      else break
+      fi
     done
 
     echo "Unpacking: $pkg"
