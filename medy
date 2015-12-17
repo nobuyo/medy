@@ -118,7 +118,7 @@ function setlab {
   # get mirror and cache dir from local
   #default
   mirror=ftp://ftp.iij.ad.jp/pub/cygwin
-  cache=/medycache
+  cache=~/medycache
   arch="$(cygwin_arch)"
 
   if [ -e /etc/setup/last-mirror ]; then
