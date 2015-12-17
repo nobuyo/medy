@@ -281,7 +281,7 @@ function medy-search {
   local pkg
 
   checkpackages "$@"
-  establish_lab
+  #establish_lab
 
     for pkg do
       echo ""
@@ -342,7 +342,7 @@ function medy-install {
   local script
 
   checkpackages "$@"
-  establish_lab
+  #establish_lab
   noupdate=1
   getsetup
   echo
