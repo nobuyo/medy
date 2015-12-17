@@ -31,8 +31,12 @@ medylogo="
              /
 "
 
-medy=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)/$(basename $0)
-lab_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
+function get_fullpath {
+  echo $(cd $(dirname $0); pwd)
+}
+
+lab_dir=$(get_fullpath ${BASH_SOURCE:-$0})
+medy="$lab_dir"/$(basename $0)
 
 function usage {
   echo "medy: Install (or build) and remove Cygwin package"
@@ -89,7 +93,7 @@ function encode_mirror_url {
 }
 
 function is-available {
-  which "$1" >/dev/null 2>&1
+  which "$1" &>/dev/null
   return $?
 }
 
@@ -111,7 +115,6 @@ function get {
 }
 
 function setlab {
-
   # get mirror and cache dir from local
   #default
   mirror=ftp://ftp.iij.ad.jp/pub/cygwin
@@ -224,9 +227,7 @@ do
         ARGS+=( "$1" )
       fi
       shift
-
     ;;
-
   esac
 done
 
@@ -240,7 +241,6 @@ do
 done
 
 function ask_user {
-
   while true
   do
     [ -n "$2" ] && { local pmt="$2"; local def=; }
@@ -363,10 +363,8 @@ function resolve_deps {
     CURRENT=""
     hasdeps=0
 
-
     for pkg in $pkgs
     do
-
       [ -f /tmp/medy-packages ] && {
         local installing="$( grep -c "$pkg" /tmp/medy-packages)"
         [ $installing = 0 ] || continue
@@ -467,7 +465,8 @@ function medy-resume-install {
       if [ "$digest" != "$digactual" ]; then
         error "SHA512 sum did not match, retry downloading..."
         aria2c $mirror/$install
-      else break
+      else
+        break
       fi
     done
 
@@ -541,14 +540,12 @@ function remove-dep {
 
   until [ -z $CURRENT ]
   do
-
     echo -n .
     pkgs=${CURRENT[@]}
     CURRENT=""
 
     for p in $pkgs
     do
-
       already="$(grep -c "^$p " /etc/setup/installed.db)"
       removing=`echo ${REMOVE[@]} | grep -c $p`
       ([ $already -gt 0 ] && [ $removing = 0 ]) || continue
@@ -591,7 +588,6 @@ function remove-dep {
 
   for pkg in ${REMOVE[@]};
   do
-
     echo Removing: $pkg
 
     if [ -e "/etc/preremove/$pkg.sh" ]; then
@@ -603,7 +599,6 @@ function remove-dep {
     rm -f "/etc/postinstall/$pkg.sh.done" "/etc/preremove/$pkg.sh" "/etc/setup/$pkg.lst.gz"
     mv /etc/setup/installed.db /etc/setup/installed.db-save
     mv /tmp/awk.$$ /etc/setup/installed.db
-
   done
   echo Done.
   exit
@@ -618,7 +613,6 @@ function medy-find {
 }
 
 function medy-upgrade {
-
   # TODO
   # escape '+' for serching update
   # for example "gcc-g++"
@@ -660,7 +654,6 @@ function medy-upgrade {
 
   medy-remove "$(echo ${target[@]})"
   medy-install "$(echo ${target[@]})"
-
 }
 
 function medy-doctor {
@@ -669,11 +662,10 @@ function medy-doctor {
 }
 
 function invoke_subcommand {
-
   local SUBCOMMAND="${@:1:1}"
   local ARGS=( "${@:2}" )
   local ACTION="medy-${SUBCOMMAND:-help}"
-  if type "$ACTION" >& /dev/null; then
+  if type "$ACTION" &>/dev/null; then
     "$ACTION" "${ARGS[@]}"
   else
     error "unknown command: $SUBCOMMAND"
