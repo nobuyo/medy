@@ -25,6 +25,20 @@
 # THE SOFTWARE.
 #
 
+# # for debug
+# exec 2> tmp.log
+# set -vx
+
+# # using GNU sed (for dev)
+# function sed {
+#   case `uname` in
+#     Darwin) # mac os
+#       gsed "$@" ;;
+#     *)
+#       sed "$@" ;;
+#   esac
+# }
+
 medylogo="
   ._ _  _  _|
   | | |(/_(_|\/
@@ -85,7 +99,8 @@ function where_dir {
 }
 
 function cygwin_arch {
-  arch | awk '{sub("i686", "x86"); print $0;}'
+  # arch | awk '{sub("i686", "x86"); print $0;}'
+  uname -m | awk '{sub("i686", "x86"); print $0;}'
 }
 
 function encode_mirror_url {
@@ -267,7 +282,7 @@ function medy-search {
   local pkg
 
   checkpackages "$@"
-  establish_lab
+  #establish_lab
 
     for pkg do
       echo ""
@@ -283,7 +298,7 @@ function medy-search {
 }
 
 function medy-info {
-
+  checkpackages "$@"
   setlab
 
   info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
@@ -328,7 +343,7 @@ function medy-install {
   local script
 
   checkpackages "$@"
-  establish_lab
+  #establish_lab
   noupdate=1
   getsetup
   echo
@@ -609,11 +624,11 @@ function remove-dep {
 }
 
 function medy-uninstall {
-  remove "$@"
+  medy-remove "$@"
 }
 
 function medy-find {
-  search "$@"
+  medy-search "$@"
 }
 
 function medy-upgrade {
