@@ -31,8 +31,12 @@ medylogo="
              /
 "
 
-medy=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)/$(basename $0)
-lab_dir=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
+function get_fullpath {
+  echo $(cd $(dirname $0); pwd)
+}
+
+lab_dir=$(get_fullpath ${BASH_SOURCE:-$0})
+medy="$lab_dir"/$(basename $0)
 
 function usage {
   echo "medy: Install (or build) and remove Cygwin package"
