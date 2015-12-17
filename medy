@@ -25,6 +25,20 @@
 # THE SOFTWARE.
 #
 
+# # for debug
+# exec 2> tmp.log
+# set -vx
+
+# # using GNU sed (for dev)
+# function sed {
+#   case `uname` in
+#     Darwin) # mac os
+#       gsed "$@" ;;
+#     *)
+#       sed "$@" ;;
+#   esac
+# }
+
 medylogo="
   ._ _  _  _|
   | | |(/_(_|\/
@@ -283,7 +297,7 @@ function medy-search {
 }
 
 function medy-info {
-
+  checkpackages "$@"
   setlab
 
   info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
@@ -605,11 +619,11 @@ function remove-dep {
 }
 
 function medy-uninstall {
-  remove "$@"
+  medy-remove "$@"
 }
 
 function medy-find {
-  search "$@"
+  medy-search "$@"
 }
 
 function medy-upgrade {
