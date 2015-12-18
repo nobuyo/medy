@@ -33,9 +33,9 @@
 # function sed {
 #   case `uname` in
 #     Darwin) # mac os
-#       gsed "$@" ;;
+#       /usr/local/bin/gsed "$@" ;;
 #     *)
-#       sed "$@" ;;
+#       /usr/bin/sed "$@" ;;
 #   esac
 # }
 
