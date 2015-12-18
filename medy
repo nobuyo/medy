@@ -664,7 +664,7 @@ function medy-upgrade {
     infocurrent="${tarcurrent##*/}"
     tarcurrent="${infocurrent%.*.*}"
 
-    if [[ $tarcurrent != $tarbase ]]; then
+    if [ "$tarcurrent" != "$tarbase" ]; then
       echo "$tarbase => $tarcurrent"
       target+="$pkgname "
     fi
@@ -674,8 +674,8 @@ function medy-upgrade {
 
   echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
-  medy-remove "$(echo ${target[@]})"
-  medy-install "$(echo ${target[@]})"
+  # medy-remove "$(echo ${target[@]})"
+  # medy-install "$(echo ${target[@]})"
 }
 
 function medy-doctor {
