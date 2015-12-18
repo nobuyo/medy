@@ -97,33 +97,15 @@ while (<SETUP_INIT>) {
 		next;
 	}
 
-	# category
-	if (/^category: ([^\n]*+)$/) {
-		$pkg_info{'category'} = $1;
-		next;
-	}
-
-	# requires
-	if (/^requires: ([^\n]*+)$/) {
-		$pkg_info{'requires'} = $1;
-		next;
-	}
-
-	# version
-	if (/^version: ([^\n]*+)$/) {
-		$pkg_info{'version'} = $1;
-		next;
-	}
-
-	# install
-	if (/^install: ([^\n]*+)$/) {
-		$pkg_info{'install'} = $1;
+	# category, requires, version, install
+	if (/^(category|requires|version|install): ([^\n]*+)$/) {
+		$pkg_info{$1} = $2;
 		next;
 	}
 
 	# ignore [prev] info
 	last if (/^\[prev\]$/);
-	# next package
+	# ignore next package
 	last if (/^@ /);
 }
 
