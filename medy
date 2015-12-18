@@ -546,8 +546,12 @@ function medy-remove {
     remove-dep
 }
 
-function remove-without-resolve-dep {
-  :
+function verify-remove {
+	local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
+  if [ "$p" = "$req" ]; then
+    echo; error "medy cannot remove package $p, exiting"
+    return 1
+  fi
 }
 
 function remove-dep {
@@ -569,14 +573,14 @@ function remove-dep {
       removing=`echo ${REMOVE[@]} | grep -c $p`
       ([ $already -gt 0 ] && [ $removing = 0 ]) || continue
 
-      local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
-      for req in $dontremove
-      do
-        if [ "$p" = "$req" ]; then
-          echo; error "medy cannot remove package $p, exiting"
-          exit 1
-        fi
-      done
+      # local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
+      # for req in $dontremove
+      # do
+      #   if [ "$p" = "$req" ]; then
+      #     echo; error "medy cannot remove package $p, exiting"
+      #     exit 1
+      #   fi
+      # done
 
       REMOVE=( ${REMOVE[@]} $p )
       do_remove=1
@@ -641,7 +645,6 @@ function medy-upgrade {
 
   target=()
   archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db |\
-  # grep -v 'cygwin,\|coreutils,\|gawk,\|bzip2,\|tar,\|xz,\|wget,\|aria2,\|bash,' |\
   tail -n +2 )"
 
   echo "@ " >> $cache/$dir/$arch/setup.ini
@@ -656,12 +659,12 @@ function medy-upgrade {
     #   sed -e 's/^@\s//' | sed '/@/,$d'| sed '/prev/,$d' |\
     #   grep 'install: ' | sed -e 's/install: //g' | awk '{print $1}')"
     tarcurrent="$(perl -ne 'print if /^@ $ENV{pkgname}\n/.../^@ /' $cache/$dir/$arch/setup.ini |\
-      head -n -1 | sed '/prev/,$d' | grep 'install: ' |\
+      sed '$d' | sed '/prev/,$d' | grep 'install: ' |\
       sed -e 's/install: //g' | awk '{print $1}')"
     infocurrent="${tarcurrent##*/}"
     tarcurrent="${infocurrent%.*.*}"
 
-    if [[ $tarcurrent != $tarbase ]]; then
+    if [ "$tarcurrent" != "$tarbase" ]; then
       echo "$tarbase => $tarcurrent"
       target+="$pkgname "
     fi
@@ -671,8 +674,8 @@ function medy-upgrade {
 
   echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
-  medy-remove "$(echo ${target[@]})"
-  medy-install "$(echo ${target[@]})"
+  # medy-remove "$(echo ${target[@]})"
+  # medy-install "$(echo ${target[@]})"
 }
 
 function medy-doctor {
