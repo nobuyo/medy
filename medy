@@ -177,7 +177,7 @@ function getsetup {
   fi
 }
 
-function update {
+function medy-update {
   setlab
   getsetup
 }
@@ -548,7 +548,7 @@ function medy-remove {
 
 function verify-remove {
 	local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
-  if [ "$p" = "$req" ]; then
+  if [ "$1" = "$req" ]; then
     echo; error "medy cannot remove package $p, exiting"
     return 1
   fi
@@ -572,6 +572,9 @@ function remove-dep {
       already="$(grep -c "^$p " /etc/setup/installed.db)"
       removing=`echo ${REMOVE[@]} | grep -c $p`
       ([ $already -gt 0 ] && [ $removing = 0 ]) || continue
+
+
+      verify-remove $p
 
       # local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
       # for req in $dontremove
