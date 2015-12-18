@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+my $target_file = "../setup.ini";
+
 sub usage {
 	my $script_name = $0;
 	print "$script_name: perser to read setup.int\n";
@@ -11,8 +13,6 @@ sub usage {
 	print "  ./$script_name <package> <tag>   to show tagged content on package info\n";
 	exit;
 }
-
-usage() if ( $#ARGV == -1 );
 
 sub show_pkg_all_info {
 	my ($pkg_info) = @_;
@@ -30,12 +30,14 @@ sub show_pkg_all_info {
 
 sub show_pkg_info {
 	my ($pkg_info, $tag) = @_;
-	unless ($tag) {
-		show_pkg_all_info(\%$pkg_info);
-	} else {
+	if (defined($tag)) {
 		print "$pkg_info->{$tag}\n" or die("tag \"$tag\" is not found.");
+	} else {
+		show_pkg_all_info(\%$pkg_info);
 	}
 }
+
+usage() if ( $#ARGV == -1 );
 
 my $pkg_name = $ARGV[0];
 my $tag_name = $ARGV[1];
@@ -52,13 +54,15 @@ my %pkg_info = (
 );
 my $on_ldesc = 0; # false
 
-if ( !(exists $pkg_info{$tag_name}) ) {
-	print "no such a tag: $tag_name\n";
-	exit -1;
+if (defined($tag_name)) {
+	if ( !(exists $pkg_info{$tag_name}) ) {
+		print "no such a tag: $tag_name\n";
+		exit -1;
+	}
 }
 
 
-open(SETUP_INIT, "< ../setup.ini") or die("could not open file");
+open(SETUP_INIT, "< $target_file") or die("could not open file");
 
 while (<SETUP_INIT>) {
 	if (/^@ $pkg_name$/) {
@@ -127,8 +131,12 @@ unless ($found_pkg) {
 	exit -1;
 }
 
+if (defined($tag_name)) {
+	show_pkg_info(\%pkg_info, "$tag_name");
+} else {
+	show_pkg_info(\%pkg_info);
+}
 
-show_pkg_info(\%pkg_info, "$tag_name");
 
 
 
