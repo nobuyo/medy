@@ -31,7 +31,7 @@ $ medy install nano
 ~~~
 
 ## for contributors
-###file description
+####file description
 filename(assumed dir) -> desc
 - setup.ini(Cygwin packages folder each Machine) -> provide packages infomation
 - installed.db(/etc/setup/installed.db) -> list of installed package on each Cygwin
