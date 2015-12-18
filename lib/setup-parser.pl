@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-my $target_file = "setup.ini";
+our $target_file = "setup.ini";
 
 sub usage {
 	my $script_name = $0;
@@ -11,6 +11,8 @@ sub usage {
 	print "Usage:\n";
 	print "  ./$script_name <package>         to show package info\n";
 	print "  ./$script_name <package> <tag>   to show tagged content on package info\n";
+	print "<tag>:\n";
+	print "  sdesc  ldesc  category  requires  version  install\n";
 	exit;
 }
 
@@ -30,10 +32,15 @@ sub show_pkg_all_info {
 
 sub show_pkg_info {
 	my ($pkg_info, $tag) = @_;
-	if (defined($tag)) {
-		print "$pkg_info->{$tag}\n" or die("tag \"$tag\" is not found.");
+	show_pkg_all_info(\%$pkg_info) unless (defined($tag));
+
+	if (ref $pkg_info->{$tag} eq 'ARRAY') {
+		foreach (@{$pkg_info->{$tag}}) {
+			print;
+		}
+		print "\n";
 	} else {
-		show_pkg_all_info(\%$pkg_info);
+		print "$pkg_info->{$tag}\n";
 	}
 }
 
@@ -41,6 +48,7 @@ usage() if ( $#ARGV == -1 );
 
 my $pkg_name = $ARGV[0];
 my $tag_name = $ARGV[1];
+# use for loop
 my $found_pkg = 0; # false
 my %pkg_info = (
 	'sdesc' => '',
@@ -52,8 +60,10 @@ my %pkg_info = (
 	'version' => '',
 	'install' => ''
 );
+# use for extracting ldesc
 my $on_ldesc = 0; # false
 
+# check if the tag name is valid
 if (defined($tag_name)) {
 	if ( !(exists $pkg_info{$tag_name}) ) {
 		print "no such a tag: $tag_name\n";
@@ -62,9 +72,10 @@ if (defined($tag_name)) {
 }
 
 
-open(SETUP_INIT, "< $target_file") or die("could not open file \"$target_file\"");
+open(SETUP_INIT_FILE, "< $target_file") or die("could not open file \"$target_file\"");
 
-while (<SETUP_INIT>) {
+while (<SETUP_INIT_FILE>) {
+	# find package name
 	if (/^@ $pkg_name$/) {
 		$found_pkg = 1; # true
 		next;
@@ -75,7 +86,7 @@ while (<SETUP_INIT>) {
 	# if package is found, tries matching as follows:
 
 	# sdesc
-	if (/^sdesc: "([^\\"]++|\\.)*+"$/) {
+	if (/^sdesc: "([^"]*+)"$/) {
 		$pkg_info{'sdesc'} = $1;
 		next;
 	}
@@ -84,13 +95,13 @@ while (<SETUP_INIT>) {
 	if (/^ldesc: /) {
 		$on_ldesc = 1; # true
 	}
-	if (/^ldesc: "([^\\"]++|\\.)*+("?)$/) {
+	if (/^ldesc: "([^"]*+)("?)$/) {
 		push(@{$pkg_info{'ldesc'}}, $1);
 		# when double quote is on end of line, on_ldesc is false.
 		$on_ldesc = 0 if ($2);
 		next;
 	}
-	if ($on_ldesc && /^([^\\"]++|\\.)*("?)$/) {
+	if ($on_ldesc && /^([^"]*+)("?)$/) {
 		push(@{$pkg_info{'ldesc'}}, $1);
 		# when double quote is on end of line, on_ldesc is false.
 		$on_ldesc = 0 if ($2);
