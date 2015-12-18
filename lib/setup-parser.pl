@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-my $target_file = "../setup.ini";
+my $target_file = "setup.ini";
 
 sub usage {
 	my $script_name = $0;
@@ -62,7 +62,7 @@ if (defined($tag_name)) {
 }
 
 
-open(SETUP_INIT, "< $target_file") or die("could not open file");
+open(SETUP_INIT, "< $target_file") or die("could not open file \"$target_file\"");
 
 while (<SETUP_INIT>) {
 	if (/^@ $pkg_name$/) {
