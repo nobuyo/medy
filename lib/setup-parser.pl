@@ -32,7 +32,11 @@ sub show_pkg_all_info {
 
 sub show_pkg_info {
 	my ($pkg_info, $tag) = @_;
-	show_pkg_all_info(\%$pkg_info) unless (defined($tag));
+	
+	unless (defined $tag) {
+		show_pkg_all_info(\%$pkg_info);
+		return;
+	}
 
 	if (ref $pkg_info->{$tag} eq 'ARRAY') {
 		foreach (@{$pkg_info->{$tag}}) {
@@ -64,7 +68,7 @@ my %pkg_info = (
 my $on_ldesc = 0; # false
 
 # check if the tag name is valid
-if (defined($tag_name)) {
+if (defined $tag_name) {
 	if ( !(exists $pkg_info{$tag_name}) ) {
 		print "no such a tag: $tag_name\n";
 		exit -1;
@@ -124,7 +128,7 @@ unless ($found_pkg) {
 	exit -1;
 }
 
-if (defined($tag_name)) {
+if (defined $tag_name) {
 	show_pkg_info(\%pkg_info, "$tag_name");
 } else {
 	show_pkg_info(\%pkg_info);
