@@ -9,8 +9,8 @@ sub usage {
 	my $script_name = $0;
 	print "$script_name: perser to read setup.int\n";
 	print "Usage:\n";
-	print "  ./$script_name <package>         to show package info\n";
-	print "  ./$script_name <package> <tag>   to show tagged content on package info\n";
+	print "  perl $script_name <package>         to show package info\n";
+	print "  perl $script_name <package> <tag>   to show tagged content on package info\n";
 	print "<tag>:\n";
 	print "  sdesc  ldesc  category  requires  version  install\n";
 	exit;
