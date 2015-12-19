@@ -38,7 +38,7 @@ filename(assumed dir) -> desc
 - setup.rc(/etc/setup/setup.rc) -> infomation of mirror, last mirror, and cache directory
 
 
-### Official
+## Official
 This script heavy based on these scripts:
 - [apt-cyg](https://github.com/transcode-open/apt-cyg)
 - [cyg-fast](https://github.com/tmshn/cyg-fast/)
