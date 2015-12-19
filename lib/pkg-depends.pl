@@ -55,12 +55,17 @@ sub fetch_pkg_depends {
 }
 
 
-usage() if ($#ARGV == -1);
-my $pkg_name = $ARGV[0];
-my %require_pkgs = ();
-fetch_pkg_depends(\%require_pkgs, $pkg_name, 0);
+if (__FILE__ eq $0) {
+	usage() if ($#ARGV == -1);
+	my $pkg_name = $ARGV[0];
+	my %require_pkgs = ();
+	fetch_pkg_depends(\%require_pkgs, $pkg_name, 0);
 
-# print "---\n";
-print join("\n", keys %require_pkgs) . "\n";
+	# print "---\n";
+	print join("\n", keys %require_pkgs) . "\n";
+} else {
+	1;
+}
+
 
 
