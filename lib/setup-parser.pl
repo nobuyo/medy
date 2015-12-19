@@ -24,13 +24,8 @@
 
 use strict;
 use warnings;
-use Exporter;
 
-our @ISA= qw(Exporter);
-# these CAN be exported.
-our @EXPORT_OK = qw();
-# these are exported by default.
-our @EXPORT = qw(extract_from_setup_init);
+package SetupParser;
 
 sub usage {
 	my $script_name = $0;
@@ -168,8 +163,11 @@ sub extract_from_setup_init {
 }
 
 
-usage() if ( $#ARGV == -1 );
-my $pkg_name = $ARGV[0];
-my $tag_name = $ARGV[1];
-extract_from_setup_init($pkg_name, $tag_name);
+if (__FILE__ eq $0) {
+	usage() if ( $#ARGV == -1 );
+	my $pkg_name = $ARGV[0];
+	my $tag_name = $ARGV[1];
+	extract_from_setup_init($pkg_name, $tag_name);
+}
 
+1;
