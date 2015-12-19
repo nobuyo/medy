@@ -1,18 +1,20 @@
 #!/usr/bin/perl
 # 
+#   setup-parser.pl -- perser to read setup.int
+# 
 # args:
 #   $package_name <- $ARGV[0]
 #   $tag_name     <- $ARGV[1]
 #     where $tag_name = 'sdesc', 'ldesc', 'category', 'requires', 'version', 'install', undef
 # 
 # input:
-#   if a enviroment variable 'SETUP_INIT_FILE_PATH' is exported, input from its file.
+#   if a enviroment variable 'SETUP_INI_FILE_PATH' is exported, input from its file.
 #   otherwise, input from stdin.
 #   how output the requirements of Vim is as follows:
 #   
 #       cat /path/to/setup.ini | perl setup-parser.pl vim requires
 #   or
-#       export SETUP_INIT_FILE_PATH=/path/to/setup.ini
+#       export SETUP_INI_FILE_PATH=/path/to/setup.ini
 #       perl setup-parser.pl vim requires
 # 
 # return:
@@ -93,7 +95,7 @@ sub extract_from_setup_init {
 
 	# select input (file or stdin)
 	my $in;
-	my $target_file = $ENV{'SETUP_INIT_FILE_PATH'};
+	my $target_file = $ENV{'SETUP_INI_FILE_PATH'};
 	if ($target_file) {
 		open($in, "< $target_file") or die("could not open file \"$target_file\"");
 	} else {
@@ -164,6 +166,7 @@ if (__FILE__ eq $0) {
 	my $pkg_name = $ARGV[0];
 	my $tag_name = $ARGV[1];
 	print extract_from_setup_init($pkg_name, $tag_name);
+} else {
+	1;
 }
 
-1;
