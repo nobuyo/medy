@@ -150,14 +150,11 @@ sub extract_from_setup_init {
 	}
 
 	unless ($found_pkg) {
+		print "no such a package: $pkg_name\n";
 		exit -1;
 	}
 
-	if (defined $tag_name) {
-		format_pkg_info(\%pkg_info, "$tag_name");
-	} else {
-		format_pkg_info(\%pkg_info);
-	}
+	\%pkg_info;
 }
 
 
@@ -165,7 +162,12 @@ if (__FILE__ eq $0) {
 	usage() if ( $#ARGV == -1 );
 	my $pkg_name = $ARGV[0];
 	my $tag_name = $ARGV[1];
-	print extract_from_setup_init($pkg_name, $tag_name);
+	my $pkg_info = extract_from_setup_init($pkg_name, $tag_name);
+	if (defined $tag_name) {
+		print format_pkg_info(\%$pkg_info, "$tag_name");
+	} else {
+		print format_pkg_info(\%$pkg_info);
+	}
 } else {
 	1;
 }
