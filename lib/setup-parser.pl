@@ -1,9 +1,29 @@
 #!/usr/bin/perl
+# 
+# args:
+#   $package_name <- $ARGV[0]
+#   $tag_name     <- $ARGV[1]
+#     where $tag_name = 'sdesc', 'ldesc', 'category', 'requires', 'version', 'install', undef
+# 
+# input:
+#   if a enviroment variable 'SETUP_INIT_FILE_PATH' is exported, input from its file.
+#   otherwise, input from stdin.
+#   how output the requirements of Vim is as follows:
+#   
+#       cat /path/to/setup.ini | perl setup-parser.pl vim requires
+#   or
+#       export SETUP_INIT_FILE_PATH=/path/to/setup.ini
+#       perl setup-parser.pl vim requires
+# 
+# return:
+#   return -1 if package name is not found in input.
+#   return -1 if tag name is invalid.
+#   if $tag_name is not specified, print $package_name's info.
+#   otherwise, print the tagged content of $package_name.
+# 
 
 use strict;
 use warnings;
-
-our $target_file = "setup.ini";
 
 sub usage {
 	my $script_name = $0;
@@ -75,10 +95,17 @@ if (defined $tag_name) {
 	}
 }
 
+# select input (file or stdin)
+my $in;
+my $target_file = $ENV{'SETUP_INIT_FILE_PATH'};
+if ($target_file) {
+	open($in, "< $target_file") or die("could not open file \"$target_file\"");
+} else {
+	$in = *STDIN
+}
 
-open(SETUP_INIT_FILE, "< $target_file") or die("could not open file \"$target_file\"");
 
-while (<SETUP_INIT_FILE>) {
+while (<$in>) {
 	# find package name
 	if (/^@ $pkg_name$/) {
 		$found_pkg = 1; # true
@@ -96,7 +123,7 @@ while (<SETUP_INIT_FILE>) {
 	}
 
 	# ldesc
-	if (/^ldesc: /) {
+	if (/^ldesc: "/) {
 		$on_ldesc = 1; # true
 	}
 	if (/^ldesc: "([^"]*+)("?)$/) {
