@@ -162,10 +162,11 @@ if (__FILE__ eq $0) {
 	usage() if ( $#ARGV == -1 );
 	my $pkg_name = $ARGV[0];
 	my $tag_name = $ARGV[1];
-	my $pkg_info = extract_from_setup_init($pkg_name, $tag_name);
+	my $pkg_info = extract_from_setup_init($pkg_name);
 
-	unless (validate_tag_name($tag_name)) {
+	if (defined $tag_name && !validate_tag_name($tag_name)) {
 		print STDERR "no such a tag: $tag_name\n";
+		exit -1;
 	}
 
 	if (defined $tag_name) {
