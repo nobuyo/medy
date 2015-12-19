@@ -38,35 +38,31 @@ sub usage {
 	exit;
 }
 
-sub show_pkg_all_info {
+sub format_pkg_all_info {
 	my ($pkg_info) = @_;
-	print "sdesc: $pkg_info->{'sdesc'}\n";
-	print "ldesc: \n";
-	foreach (@{$pkg_info->{'ldesc'}}) {
-		print;
-	}
-	print "\n";
-	print "category: $pkg_info->{'category'}\n";
-	print "requires: $pkg_info->{'requires'}\n";
-	print "version: $pkg_info->{'version'}\n";
-	print "install: $pkg_info->{'install'}\n";
+	my @each_lines = (
+		"sdesc: $pkg_info->{'sdesc'}",
+		"ldesc: \n" . join('', @{$pkg_info->{'ldesc'}}),
+		"category: $pkg_info->{'category'}",
+		"requires: $pkg_info->{'requires'}",
+		"version: $pkg_info->{'version'}",
+		"install: $pkg_info->{'install'}",
+		"" # ends with \n
+	);
+	return join("\n", @each_lines);
 }
 
-sub show_pkg_info {
+sub format_pkg_info {
 	my ($pkg_info, $tag) = @_;
 	
 	unless (defined $tag) {
-		show_pkg_all_info(\%$pkg_info);
-		return;
+		return format_pkg_all_info(\%$pkg_info);
 	}
 
 	if (ref $pkg_info->{$tag} eq 'ARRAY') {
-		foreach (@{$pkg_info->{$tag}}) {
-			print;
-		}
-		print "\n";
+		return join('', @{$pkg_info->{$tag}})
 	} else {
-		print "$pkg_info->{$tag}\n";
+		return "$pkg_info->{$tag}\n";
 	}
 }
 
@@ -107,7 +103,7 @@ sub extract_from_setup_init {
 
 	while (<$in>) {
 		# find package name
-		if (/^@ $pkg_name$/) {
+		if (/^@ \Q$pkg_name\E$/) {
 			$found_pkg = 1; # true
 			next;
 		}
@@ -156,9 +152,9 @@ sub extract_from_setup_init {
 	}
 
 	if (defined $tag_name) {
-		show_pkg_info(\%pkg_info, "$tag_name");
+		format_pkg_info(\%pkg_info, "$tag_name");
 	} else {
-		show_pkg_info(\%pkg_info);
+		format_pkg_info(\%pkg_info);
 	}
 }
 
@@ -167,7 +163,7 @@ if (__FILE__ eq $0) {
 	usage() if ( $#ARGV == -1 );
 	my $pkg_name = $ARGV[0];
 	my $tag_name = $ARGV[1];
-	extract_from_setup_init($pkg_name, $tag_name);
+	print extract_from_setup_init($pkg_name, $tag_name);
 }
 
 1;
