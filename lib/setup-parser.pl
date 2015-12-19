@@ -24,6 +24,13 @@
 
 use strict;
 use warnings;
+use Exporter;
+
+our @ISA= qw(Exporter);
+# these CAN be exported.
+our @EXPORT_OK = qw();
+# these are exported by default.
+our @EXPORT = qw(extract_from_setup_init);
 
 sub usage {
 	my $script_name = $0;
@@ -68,99 +75,101 @@ sub show_pkg_info {
 	}
 }
 
-usage() if ( $#ARGV == -1 );
+sub extract_from_setup_init {
+	my ($pkg_name, $tag_name) = @_;
+	# use for loop
+	my $found_pkg = 0; # false
+	my %pkg_info = (
+		'sdesc' => '',
+		'ldesc' => [
+			# each lines
+		],
+		'category' => '',
+		'requires' => '',
+		'version' => '',
+		'install' => ''
+	);
+	# use for extracting ldesc
+	my $on_ldesc = 0; # false
 
-my $pkg_name = $ARGV[0];
-my $tag_name = $ARGV[1];
-# use for loop
-my $found_pkg = 0; # false
-my %pkg_info = (
-	'sdesc' => '',
-	'ldesc' => [
-		# each lines
-	],
-	'category' => '',
-	'requires' => '',
-	'version' => '',
-	'install' => ''
-);
-# use for extracting ldesc
-my $on_ldesc = 0; # false
+	# check if the tag name is valid
+	if (defined $tag_name) {
+		if ( !(exists $pkg_info{$tag_name}) ) {
+			print "no such a tag: $tag_name\n";
+			exit -1;
+		}
+	}
 
-# check if the tag name is valid
-if (defined $tag_name) {
-	if ( !(exists $pkg_info{$tag_name}) ) {
-		print "no such a tag: $tag_name\n";
+	# select input (file or stdin)
+	my $in;
+	my $target_file = $ENV{'SETUP_INIT_FILE_PATH'};
+	if ($target_file) {
+		open($in, "< $target_file") or die("could not open file \"$target_file\"");
+	} else {
+		$in = *STDIN
+	}
+
+
+	while (<$in>) {
+		# find package name
+		if (/^@ $pkg_name$/) {
+			$found_pkg = 1; # true
+			next;
+		}
+
+		next unless ($found_pkg);
+
+		# if package is found, tries matching as follows:
+
+		# sdesc
+		if (/^sdesc: "([^"]*+)"$/) {
+			$pkg_info{'sdesc'} = $1;
+			next;
+		}
+
+		# ldesc
+		if (/^ldesc: "/) {
+			$on_ldesc = 1; # true
+		}
+		if (/^ldesc: "([^"]*+)("?)$/) {
+			push(@{$pkg_info{'ldesc'}}, $1);
+			# when double quote is on end of line, on_ldesc is false.
+			$on_ldesc = 0 if ($2);
+			next;
+		}
+		if ($on_ldesc && /^([^"]*+)("?)$/) {
+			push(@{$pkg_info{'ldesc'}}, $1);
+			# when double quote is on end of line, on_ldesc is false.
+			$on_ldesc = 0 if ($2);
+			next;
+		}
+
+		# category, requires, version, install
+		if (/^(category|requires|version|install): ([^\n]*+)$/) {
+			$pkg_info{$1} = $2;
+			next;
+		}
+
+		# ignore [prev] info
+		last if (/^\[prev\]$/);
+		# ignore next package
+		last if (/^@ /);
+	}
+
+	unless ($found_pkg) {
 		exit -1;
 	}
-}
 
-# select input (file or stdin)
-my $in;
-my $target_file = $ENV{'SETUP_INIT_FILE_PATH'};
-if ($target_file) {
-	open($in, "< $target_file") or die("could not open file \"$target_file\"");
-} else {
-	$in = *STDIN
+	if (defined $tag_name) {
+		show_pkg_info(\%pkg_info, "$tag_name");
+	} else {
+		show_pkg_info(\%pkg_info);
+	}
 }
 
 
-while (<$in>) {
-	# find package name
-	if (/^@ $pkg_name$/) {
-		$found_pkg = 1; # true
-		next;
-	}
-
-	next unless ($found_pkg);
-
-	# if package is found, tries matching as follows:
-
-	# sdesc
-	if (/^sdesc: "([^"]*+)"$/) {
-		$pkg_info{'sdesc'} = $1;
-		next;
-	}
-
-	# ldesc
-	if (/^ldesc: "/) {
-		$on_ldesc = 1; # true
-	}
-	if (/^ldesc: "([^"]*+)("?)$/) {
-		push(@{$pkg_info{'ldesc'}}, $1);
-		# when double quote is on end of line, on_ldesc is false.
-		$on_ldesc = 0 if ($2);
-		next;
-	}
-	if ($on_ldesc && /^([^"]*+)("?)$/) {
-		push(@{$pkg_info{'ldesc'}}, $1);
-		# when double quote is on end of line, on_ldesc is false.
-		$on_ldesc = 0 if ($2);
-		next;
-	}
-
-	# category, requires, version, install
-	if (/^(category|requires|version|install): ([^\n]*+)$/) {
-		$pkg_info{$1} = $2;
-		next;
-	}
-
-	# ignore [prev] info
-	last if (/^\[prev\]$/);
-	# ignore next package
-	last if (/^@ /);
-}
-
-unless ($found_pkg) {
-	exit -1;
-}
-
-if (defined $tag_name) {
-	show_pkg_info(\%pkg_info, "$tag_name");
-} else {
-	show_pkg_info(\%pkg_info);
-}
-
-
-
+usage() if ( $#ARGV == -1 );
+my $pkg_name = $ARGV[0];
+my $tag_name = $ARGV[1];
+extract_from_setup_init($pkg_name, $tag_name);
 
