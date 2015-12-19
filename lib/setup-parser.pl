@@ -88,7 +88,7 @@ sub extract_from_setup_init {
 	# check if the tag name is valid
 	if (defined $tag_name) {
 		if ( !(exists $pkg_info{$tag_name}) ) {
-			print "no such a tag: $tag_name\n";
+			print STDERR "no such a tag: $tag_name\n";
 			exit -1;
 		}
 	}
@@ -150,7 +150,7 @@ sub extract_from_setup_init {
 	}
 
 	unless ($found_pkg) {
-		print "no such a package: $pkg_name\n";
+		print STDERR "no such a package: $pkg_name\n";
 		exit -1;
 	}
 
