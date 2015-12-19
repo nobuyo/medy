@@ -19,7 +19,8 @@
 
 use strict;
 use warnings;
-require 'lib/setup-parser.pl';
+use File::Basename;
+require '' . dirname(__FILE__) . '/setup-parser.pl';
 
 package PkgDepends;
 
