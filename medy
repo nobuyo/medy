@@ -177,7 +177,7 @@ function getsetup {
   fi
 }
 
-function update {
+function medy-update {
   setlab
   getsetup
 }
