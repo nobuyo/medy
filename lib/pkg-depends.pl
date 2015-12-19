@@ -26,9 +26,8 @@ sub fetch_pkg_depends {
 	my $requires_str = SetupParser::extract_from_setup_init($pkg_name, 'requires');
 	my @requires     = split(/\s+/, $requires_str);
 
-	print "begin: $nest\n";
-	print join(' ', keys %require_pkgs) . "\n";
-	# print "requires_str: $requires_str\n";
+	# print "begin: $nest\n";
+	# print join(' ', keys %require_pkgs) . "\n";
 
 	foreach (@requires) {
 		my $require_pkg = $_;
@@ -38,14 +37,13 @@ sub fetch_pkg_depends {
 		fetch_pkg_depends(\%require_pkgs, $require_pkg, $nest + 1);
 	}
 
-	print "end: $nest\n";
+	# print "end: $nest\n";
 }
 
 fetch_pkg_depends(\%require_pkgs, $pkg_name, 0);
 
-print "---\n";
-foreach (keys %require_pkgs) {
-	print "$_\n";
-}
+# print "---\n";
+
+print join(' ', keys %require_pkgs) . "\n";
 
 
