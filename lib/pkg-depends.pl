@@ -37,7 +37,8 @@ sub usage {
 
 sub fetch_pkg_depends {
 	my ($require_pkgs, $pkg_name, $nest) = @_;
-	my $requires_str = SetupParser::extract_from_setup_init($pkg_name, 'requires');
+	my $pkg_info     = SetupParser::extract($pkg_name);
+	my $requires_str = SetupParser::format_pkg_info(\%$pkg_info, 'requires');
 	my @requires     = split(/\s+/, $requires_str);
 
 	# print "begin: $nest\n";
@@ -53,7 +54,6 @@ sub fetch_pkg_depends {
 
 	# print "end: $nest\n";
 }
-
 
 if (__FILE__ eq $0) {
 	usage() if ($#ARGV == -1);
