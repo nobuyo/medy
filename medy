@@ -547,13 +547,6 @@ function medy-remove {
 }
 
 function verify-remove {
-<<<<<<< HEAD
-	local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
-  if [ "$1" = "$req" ]; then
-    echo; error "medy cannot remove package $p, exiting"
-    return 1
-  fi
-=======
   for req in $dontremove
   do
     local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
@@ -562,7 +555,6 @@ function verify-remove {
       return 1
     fi
   done
->>>>>>> c8ace1f5087a152f3f5c1ccfcf7421829ec27260
 }
 
 function remove-dep {
