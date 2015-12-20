@@ -68,8 +68,13 @@ sub format_pkg_info {
 	}
 }
 
+# check if the tag name is valid
+sub validate_tag_name {
+	$_[0] =~ /^(?:requires|sdesc|ldesc|category|version|install)$/;
+}
+
 sub extract_from_setup_init {
-	my ($pkg_name, $tag_name) = @_;
+	my ($pkg_name) = @_;
 	# use for loop
 	my $found_pkg = 0; # false
 	my %pkg_info = (
@@ -85,14 +90,6 @@ sub extract_from_setup_init {
 	# use for extracting ldesc
 	my $on_ldesc = 0; # false
 
-	# check if the tag name is valid
-	if (defined $tag_name) {
-		if ( !(exists $pkg_info{$tag_name}) ) {
-			print "no such a tag: $tag_name\n";
-			exit -1;
-		}
-	}
-
 	# select input (file or stdin)
 	my $in;
 	my $target_file = $ENV{'SETUP_INI_FILE_PATH'};
@@ -101,7 +98,6 @@ sub extract_from_setup_init {
 	} else {
 		$in = *STDIN
 	}
-
 
 	while (<$in>) {
 		# find package name
@@ -150,14 +146,15 @@ sub extract_from_setup_init {
 	}
 
 	unless ($found_pkg) {
+		print STDERR "no such a package: $pkg_name\n";
 		exit -1;
 	}
 
-	if (defined $tag_name) {
-		format_pkg_info(\%pkg_info, "$tag_name");
-	} else {
-		format_pkg_info(\%pkg_info);
-	}
+	\%pkg_info;
+}
+
+sub extract {
+	extract_from_setup_init @_;
 }
 
 
@@ -165,7 +162,18 @@ if (__FILE__ eq $0) {
 	usage() if ( $#ARGV == -1 );
 	my $pkg_name = $ARGV[0];
 	my $tag_name = $ARGV[1];
-	print extract_from_setup_init($pkg_name, $tag_name);
+	my $pkg_info = extract_from_setup_init($pkg_name);
+
+	if (defined $tag_name && !validate_tag_name($tag_name)) {
+		print STDERR "no such a tag: $tag_name\n";
+		exit -1;
+	}
+
+	if (defined $tag_name) {
+		print format_pkg_info(\%$pkg_info, "$tag_name");
+	} else {
+		print format_pkg_info(\%$pkg_info);
+	}
 } else {
 	1;
 }
