@@ -34,6 +34,16 @@ sub usage {
 	exit;
 }
 
+# create requirements table
+# return the structure like:
+# 
+#     (
+#         '4ti2-debuginfo' => ['cygwin-debuginfo'],
+#         'a2ps'           => ['bash', 'libiconv2', 'libintl8', 'libpaper1', ..., 'cygwin'],
+#           :
+#         'zsh'            => ['cygwin', 'libncursesw10', 'libpcre1', 'libiconv2', 'libgdbm4', '_update-info-dir']
+#     )
+# 
 sub create_requirements_table {
 	my %pkg_requirements_table = ();
 
@@ -61,6 +71,17 @@ sub create_requirements_table {
 	\%pkg_requirements_table;
 }
 
+# fetch the package all nested dependency
+# 
+# args:
+#   $pkg_requirements_table - requirements table, see create_requirements_table().
+#   $require_pkgs           - empty hash, this function stores the required packages to the hash.
+#   $pkg_name               - package name, to fetch its dependent packages.
+#   $nest                   - nest level, starts with 0
+# 
+# return:
+#   nothing
+# 
 sub fetch_pkg_depends {
 	my ($pkg_requirements_table, $require_pkgs, $pkg_name, $nest) = @_;
 	my @requires = @{ $pkg_requirements_table->{$pkg_name} || [] };
@@ -82,8 +103,8 @@ sub fetch_pkg_depends {
 if (__FILE__ eq $0) {
 	usage() if ($#ARGV == -1);
 	my $pkg_name = $ARGV[0];
-	my %require_pkgs = ();
 	my %pkg_requirements_table = %{ create_requirements_table() };
+	my %require_pkgs = ();
 
 	fetch_pkg_depends(\%pkg_requirements_table, \%require_pkgs, $pkg_name, 0);
 
