@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 medylogo="
   ._ _  _  _|

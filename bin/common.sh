@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function get_fullpath {
   echo $(cd $(dirname $0); pwd)
