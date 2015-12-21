@@ -30,8 +30,10 @@ function verify-remove {
   do
     local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
     if [ "$1" = "$req" ]; then
-      echo; error "medy cannot remove package $p, exiting"
+      echo; error "medy cannot remove package $1, exiting"
       return 1
+    else
+      return 0
     fi
   done
 }
