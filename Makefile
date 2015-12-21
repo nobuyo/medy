@@ -10,7 +10,7 @@ GEN_FILE  = ./bin/medy
 all: combine
 
 combine: $(GEN_FILE)
-$(GEN_FILE): ./bin/common.sh ./bin/medy*.sh ./lib/*.pl
+$(GEN_FILE): ./bin/common.sh ./bin/medy-*.sh ./lib/*.pl
 	awk -f lib/combine.awk $(BASE_FILE) > $(GEN_FILE)
 	chmod +x $(GEN_FILE)
 
