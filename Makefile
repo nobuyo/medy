@@ -1,7 +1,7 @@
 
 SHELL = /bin/sh
 
-BASE_FILE = ./bin/medy-base.sh
+BASE_FILE = ./bin/base.sh
 GEN_FILE  = ./bin/medy
 
 .PHONY: combine force
