@@ -1,8 +1,8 @@
 
 SHELL = /bin/sh
 
-BASE_FILE = ./bin/medy.sh
-GEN_FILE  = ./bin/combined-medy.sh
+BASE_FILE = ./bin/medy-base.sh
+GEN_FILE  = ./bin/medy
 
 .PHONY: combine force
 .SILENT: $(GEN_FILE)
