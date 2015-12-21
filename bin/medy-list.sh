@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function medy-list {
     echo 1>&2 The installed packages as follows:
