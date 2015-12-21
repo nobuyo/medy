@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function medy-upgrade-self {
   mv $medy $lab_dir/medy.orig

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function medy-doctor {
   # check dependencies of installed packages
