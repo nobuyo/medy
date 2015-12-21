@@ -2,8 +2,7 @@
 
 function medy-upgrade {
   # TODO
-  # escape '+' for serching update
-  # for example "gcc-g++"
+  # Remove package without resolve dep
 
   setlab
   getsetup
