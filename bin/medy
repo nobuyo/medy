@@ -39,6 +39,8 @@
 #   esac
 # }
 
+#> echo export DEPLOY='true'
+export DEPLOY=true
 #> cat ./bin/common.sh | perl -ne 'print unless /^#!/'
 
 function get_fullpath {
@@ -642,6 +644,7 @@ function medy-version {
 }
 
 function include {
+  if [ "$DEPLOY" = 'true' ]; then return; fi
   for file in $@; do
     test -f "$file" && source "$file"
   done

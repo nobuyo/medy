@@ -39,10 +39,12 @@
 #   esac
 # }
 
+#> echo export DEPLOY='true'
 #> cat ./bin/common.sh | perl -ne 'print unless /^#!/'
 #> cat ./bin/medy-*.sh | perl -ne 'print unless /^#!/'
 
 function include {
+  if [ "$DEPLOY" = 'true' ]; then return; fi
   for file in $@; do
     test -f "$file" && source "$file"
   done
