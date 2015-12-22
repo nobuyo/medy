@@ -39,6 +39,8 @@
 #   esac
 # }
 
+#> echo export DEPLOY='true'
+export DEPLOY=true
 #> cat ./bin/common.sh | perl -ne 'print unless /^#!/'
 
 function get_fullpath {
@@ -460,8 +462,10 @@ function verify-remove {
   do
     local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
     if [ "$1" = "$req" ]; then
-      echo; error "medy cannot remove package $p, exiting"
+      echo; error "medy cannot remove package $1, exiting"
       return 1
+    else
+      return 0
     fi
   done
 }
@@ -570,6 +574,22 @@ function medy-update {
   getsetup
 }
 
+function medy-upgrade-self {
+  mv $medy $lab_dir/medy.orig
+  get -Oq "https://raw.githubusercontent.com/nobuyo/medy/master/medy" -P /lab_dir
+  if [ $? -ne 0 ]; then
+    error "medy Could not found, reverting"
+    $lab_dir/medy.orig $medy
+  fi
+
+  chmod 775 $medy
+  success "Updated medy"
+}
+
+function medy-remove-without-resolve-dep {
+  :
+}
+
 function medy-upgrade {
   # TODO
   # Remove package without resolve dep
@@ -612,18 +632,6 @@ function medy-upgrade {
   # medy-install "$(echo ${target[@]})"
 }
 
-function medy-upgrade-self {
-  mv $medy $lab_dir/medy.orig
-  get -Oq "https://raw.githubusercontent.com/nobuyo/medy/master/medy" -P /lab_dir
-  if [ $? -ne 0 ]; then
-    error "medy Could not found, reverting"
-    $lab_dir/medy.orig $medy
-  fi
-
-  chmod 775 $medy
-  success "Updated medy"
-}
-
 medylogo="
   ._ _  _  _|
   | | |(/_(_|\/
@@ -634,6 +642,16 @@ function medy-version {
   echo "$medylogo"
   echo "  medy version 0.01"
 }
+
+function include {
+  if [ "$DEPLOY" = 'true' ]; then return; fi
+  for file in $@; do
+    test -f "$file" && source "$file"
+  done
+}
+
+include ./bin/common.sh
+include ./bin/medy-*.sh
 
 OPT_FILES=()
 SUBCOMMAND=""
