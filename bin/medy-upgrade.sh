@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+function medy-remove-without-resolve-dep {
+  :
+}
+
 function medy-upgrade {
   # TODO
   # Remove package without resolve dep
