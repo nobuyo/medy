@@ -42,6 +42,15 @@
 #> cat ./bin/common.sh | perl -ne 'print unless /^#!/'
 #> cat ./bin/medy-*.sh | perl -ne 'print unless /^#!/'
 
+function include {
+  for file in $@; do
+    test -f "$file" && source "$file"
+  done
+}
+
+include ./bin/common.sh
+include ./bin/medy-*.sh
+
 OPT_FILES=()
 SUBCOMMAND=""
 YES_TO_ALL=false
