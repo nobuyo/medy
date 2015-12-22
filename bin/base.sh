@@ -57,6 +57,7 @@ OPT_FILES=()
 SUBCOMMAND=""
 YES_TO_ALL=false
 force=""
+DRY_RUN=false
 INITIAL_ARGS=( "$@" )
 ARGS=()
 while [ $# -gt 0 ]
@@ -75,6 +76,11 @@ do
 
     --yes-to-all|-y)
       YES_TO_ALL=1
+      shift
+    ;;
+
+    --dry-run)
+      DRY_RUN=1
       shift
     ;;
 

@@ -26,7 +26,7 @@ function medy-upgrade {
     # tarcurrent="$(grep -wA22 "^@ $pkgname" $cache/$dir/$arch/setup.ini |\
     #   sed -e 's/^@\s//' | sed '/@/,$d'| sed '/prev/,$d' |\
     #   grep 'install: ' | sed -e 's/install: //g' | awk '{print $1}')"
-    tarcurrent="$(perl -ne 'print if /^@ $ENV{pkgname}\n/.../^@ /' $cache/$dir/$arch/setup.ini |\
+    tarcurrent="$(perl -ne 'print if /^@ \Q$ENV{pkgname}\E\n/.../^@ /' $cache/$dir/$arch/setup.ini |\
       sed '$d' | sed '/prev/,$d' | grep 'install: ' |\
       sed -e 's/install: //g' | awk '{print $1}')"
     infocurrent="${tarcurrent##*/}"
@@ -40,8 +40,10 @@ function medy-upgrade {
 
   sed -i '$d' $cache/$dir/$arch/setup.ini
 
-  echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
+  if [ $DRY_RUN -ne 1 ]; then
+    echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
-  # medy-remove "$(echo ${target[@]})"
-  # medy-install "$(echo ${target[@]})"
+    # medy-remove "$(echo ${target[@]})"
+    # medy-install "$(echo ${target[@]})"
+  fi
 }
