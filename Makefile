@@ -4,12 +4,15 @@ SHELL = /bin/sh
 BASE_FILE = ./bin/base.sh
 GEN_FILE  = ./bin/medy
 
-.PHONY: combine force
+.PHONY: combine recombine
 
 all: combine
 
 combine: $(GEN_FILE)
-$(GEN_FILE): ./bin/common.sh ./bin/medy-*.sh ./bin/perl-module/*.sh
+$(GEN_FILE): $(BASE_FILE) ./bin/common.sh ./bin/medy-*.sh ./bin/perl-module/*.sh
 	awk -f lib/combine.awk $(BASE_FILE) > $(GEN_FILE)
 	chmod +x $(GEN_FILE)
 
+recombine:
+	@touch $(BASE_FILE)
+	@$(MAKE) combine
