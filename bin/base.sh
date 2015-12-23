@@ -91,12 +91,12 @@ do
     ;;
 
     --help)
-      usage
+      medy-help
       exit 0
     ;;
 
     --version|-V)
-      version
+      medy-version
       exit 0
     ;;
 

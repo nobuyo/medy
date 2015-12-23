@@ -84,8 +84,10 @@ function setlab {
     cache="$(cygpath -au "$(awk '/last-cache/ {getline; print $1}' /etc/setup/setup.rc)")"
   fi
 
-  where_mirror $mirror
-  where_dir $cache
+  if [ $noisy_view = 1 ]; then
+    where_mirror $mirror
+    where_dir $cache
+  fi
 
   mkdir -p "$cache/$dir/$arch"
   cd "$cache/$dir/$arch"

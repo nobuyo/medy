@@ -4,8 +4,8 @@ function medy-search {
   local pkg
 
   checkpackages "$@"
-  #setlab
-
+  setlab
+  
   for pkg do
     echo ""
     echo "Searching..."
