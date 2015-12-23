@@ -92,11 +92,11 @@ function setlab {
   mkdir -p "$cache/$dir/$arch"
   cd "$cache/$dir/$arch"
   if [ -e setup.ini ]; then
-    export export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
+    export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
     return 0
   else
     getsetup
-    export export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
+    export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
     return 1
   fi
 }
