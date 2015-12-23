@@ -48,7 +48,7 @@ function medy-upgrade {
     tarcurrent="${infocurrent%.*.*}"
 
     if [ "$tarcurrent" != "$tarbase" ]; then
-      echo "$tarbase => $tarcurrent"
+      echo -e "$tarbase \033[32m==>\033[m $tarcurrent"
       target+="$pkgname "
     fi
   done

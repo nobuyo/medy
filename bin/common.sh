@@ -52,10 +52,12 @@ function checkpackages {
 }
 
 function get {
-  if is-available "wget"; then
-    command wget "$@" &>/dev/null
+  if is-available "wget" && [ $noisy_view = 1 ]; then
+    command wget "$@"
   # elif is-available "curl"; then
   #   command curl -O "${@:2}"
+  elif is-available "wget" && [ $noisy_view = 0 ]; then
+    command wget "$@" &>/dev/null
   else
     warn "wget not installed."
   fi

@@ -58,6 +58,7 @@ SUBCOMMAND=""
 YES_TO_ALL=false
 force=""
 DRY_RUN=false
+noisy_view=0
 INITIAL_ARGS=( "$@" )
 ARGS=()
 while [ $# -gt 0 ]
@@ -84,12 +85,17 @@ do
       shift
     ;;
 
+    --view|-v)
+      noisy_view=1
+      shift
+    ;;
+
     --help)
       usage
       exit 0
     ;;
 
-    --version)
+    --version|-V)
       version
       exit 0
     ;;
