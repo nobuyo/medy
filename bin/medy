@@ -458,11 +458,11 @@ function medy-remove {
 }
 
 function verify-remove {
-  for req in $dontremove
-  do
-    local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
-    if [ "$1" = "$req" ]; then
-      echo; error "medy cannot remove package $1, exiting"
+  local dontremove=(cygwin coreutils gawk bzip2 tar xz wget aria2 bash)
+  for req in ${dontremove[@]};  do
+    echo $1 $req
+    if [[ $1 = $req ]]; then
+      error "medy cannot remove package $1, skipping"
       return 1
     else
       return 0
@@ -574,20 +574,23 @@ function medy-update {
   getsetup
 }
 
-function medy-upgrade-self {
-  mv $medy $lab_dir/medy.orig
-  get -Oq "https://raw.githubusercontent.com/nobuyo/medy/master/medy" -P /lab_dir
-  if [ $? -ne 0 ]; then
-    error "medy Could not found, reverting"
-    $lab_dir/medy.orig $medy
-  fi
+function remove-without-resolve-dep {
+  for pkg in $@;
+  do
+    verify-remove $pkg && echo Removing: $pkg
 
-  chmod 775 $medy
-  success "Updated medy"
-}
+    # if [ -e "/etc/preremove/$pkg.sh" ]; then
+    #   "/etc/preremove/$pkg.sh"
+    # fi
 
-function medy-remove-without-resolve-dep {
-  :
+    # gzip -cd "/etc/setup/$pkg.lst.gz" | awk '/[^\/]$/ {print "rm -f \"/" $0 "\""}' | sh
+    # awk > /tmp/awk.$$ -v pkg="$pkg" '{if (pkg != $1) print $0}' /etc/setup/installed.db
+    # rm -f "/etc/postinstall/$pkg.sh.done" "/etc/preremove/$pkg.sh" "/etc/setup/$pkg.lst.gz"
+    # mv /etc/setup/installed.db /etc/setup/installed.db-save
+    # mv /tmp/awk.$$ /etc/setup/installed.db
+  
+  done
+  echo Done.
 }
 
 function medy-upgrade {
@@ -612,7 +615,7 @@ function medy-upgrade {
     # tarcurrent="$(grep -wA22 "^@ $pkgname" $cache/$dir/$arch/setup.ini |\
     #   sed -e 's/^@\s//' | sed '/@/,$d'| sed '/prev/,$d' |\
     #   grep 'install: ' | sed -e 's/install: //g' | awk '{print $1}')"
-    tarcurrent="$(perl -ne 'print if /^@ $ENV{pkgname}\n/.../^@ /' $cache/$dir/$arch/setup.ini |\
+    tarcurrent="$(perl -ne 'print if /^@ \Q$ENV{pkgname}\E\n/.../^@ /' $cache/$dir/$arch/setup.ini |\
       sed '$d' | sed '/prev/,$d' | grep 'install: ' |\
       sed -e 's/install: //g' | awk '{print $1}')"
     infocurrent="${tarcurrent##*/}"
@@ -626,10 +629,24 @@ function medy-upgrade {
 
   sed -i '$d' $cache/$dir/$arch/setup.ini
 
-  echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
+  if [ $DRY_RUN != 1 ]; then
+    echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
-  # medy-remove "$(echo ${target[@]})"
-  # medy-install "$(echo ${target[@]})"
+    remove-without-resolve-dep "$(echo ${target[@]})"
+    # medy-install "$(echo ${target[@]})"
+  fi
+}
+
+function medy-upgrade-self {
+  mv $medy $lab_dir/medy.orig
+  get -Oq "https://raw.githubusercontent.com/nobuyo/medy/master/medy" -P /lab_dir
+  if [ $? -ne 0 ]; then
+    error "medy Could not found, reverting"
+    $lab_dir/medy.orig $medy
+  fi
+
+  chmod 775 $medy
+  success "Updated medy"
 }
 
 medylogo="
@@ -657,6 +674,7 @@ OPT_FILES=()
 SUBCOMMAND=""
 YES_TO_ALL=false
 force=""
+DRY_RUN=false
 INITIAL_ARGS=( "$@" )
 ARGS=()
 while [ $# -gt 0 ]
@@ -675,6 +693,11 @@ do
 
     --yes-to-all|-y)
       YES_TO_ALL=1
+      shift
+    ;;
+
+    --dry-run)
+      DRY_RUN=1
       shift
     ;;
 
