@@ -52,6 +52,7 @@ function include {
 
 include ./bin/common.sh
 include ./bin/medy-*.sh
+include ./bin/perl-module/*.sh
 
 OPT_FILES=()
 SUBCOMMAND=""

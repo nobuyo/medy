@@ -27,8 +27,14 @@ function medy-remove {
 
 function verify-remove {
   local dontremove=(cygwin coreutils gawk bzip2 tar xz wget aria2 bash)
+  local dontremovewithdep=()
+
+  for dep in ${dontremove[@]}; do
+    dontremovewithdep+="$(pkg-depends $dep) "
+  done
+
   remove_skip=0
-  for req in ${dontremove[@]}; do
+  for req in ${dontremovewithdep[@]}; do
     if [[ $1 = $req ]] && [ $remove_skip = 0 ]; then
       error "medy cannot remove package $1, skipping"
       remove_skip=1
@@ -57,17 +63,14 @@ function remove-dep {
       removing=`echo ${REMOVE[@]} | grep -c $p`
       ([ $already -gt 0 ] && [ $removing = 0 ]) || continue
 
-
-      verify-remove $p
-
-      # local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
-      # for req in $dontremove
-      # do
-      #   if [ "$p" = "$req" ]; then
-      #     echo; error "medy cannot remove package $p, exiting"
-      #     exit 1
-      #   fi
-      # done
+      local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
+      for req in $dontremove
+      do
+        if [ "$p" = "$req" ]; then
+          echo; error "medy cannot remove package $p, exiting"
+          exit 1
+        fi
+      done
 
       REMOVE=( ${REMOVE[@]} $p )
       do_remove=1
