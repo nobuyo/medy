@@ -39,7 +39,7 @@ function verify-remove {
   remove_skip=0
   for req in ${dontremovewithdep[@]}; do
     if [[ $1 = $req ]] && [ $remove_skip = 0 ]; then
-      error "medy cannot remove package $1, skipping"
+      warn "medy cannot remove package $1, skipping"
       remove_skip=1
     elif [ $remove_skip = 0 ]; then
       remove_skip=0

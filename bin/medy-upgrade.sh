@@ -16,7 +16,6 @@ function remove-to-upgrade {
       # rm -f "/etc/postinstall/$pkg.sh.done" "/etc/preremove/$pkg.sh" "/etc/setup/$pkg.lst.gz"
       # mv /etc/setup/installed.db /etc/setup/installed.db-save
       # mv /tmp/awk.$$ /etc/setup/installed.db
-    fi
   done
   echo Done.
 }
@@ -58,8 +57,7 @@ function medy-upgrade {
   if [ $DRY_RUN != 1 ]; then
     echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
-    echo ${target[@]}
     remove-to-upgrade "$(echo ${target[@]})"
-    # medy-install "$(echo ${target[@]})"
+    medy-install "$(echo ${target[@]})"
   fi
 }
