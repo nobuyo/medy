@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function remove-without-resolve-dep {
+function remove-to-upgrade {
   for pkg in $@;
   do
     verify-remove $pkg
@@ -61,7 +61,7 @@ function medy-upgrade {
     echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
     echo ${target[@]}
-    remove-without-resolve-dep "$(echo ${target[@]})"
+    remove-to-upgrade "$(echo ${target[@]})"
     # medy-install "$(echo ${target[@]})"
   fi
 }
