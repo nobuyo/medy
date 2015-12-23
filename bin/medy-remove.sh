@@ -27,15 +27,16 @@ function medy-remove {
 
 function verify-remove {
   local dontremove=(cygwin coreutils gawk bzip2 tar xz wget aria2 bash)
+  local skip=0
   for req in ${dontremove[@]};  do
-    echo $1 $req
     if [[ $1 = $req ]]; then
       error "medy cannot remove package $1, skipping"
-      return 1
+      skip=1
     else
-      return 0
+      skip=0
     fi
   done
+  return $skip
 }
 
 function remove-dep {
