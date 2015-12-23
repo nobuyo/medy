@@ -3,18 +3,19 @@
 function remove-without-resolve-dep {
   for pkg in $@;
   do
-    verify-remove $pkg && echo Removing: $pkg
+    verify-remove $pkg && {
+    echo Removing: $pkg
 
-    # if [ -e "/etc/preremove/$pkg.sh" ]; then
-    #   "/etc/preremove/$pkg.sh"
-    # fi
+    if [ -e "/etc/preremove/$pkg.sh" ]; then
+      "/etc/preremove/$pkg.sh"
+    fi
 
-    # gzip -cd "/etc/setup/$pkg.lst.gz" | awk '/[^\/]$/ {print "rm -f \"/" $0 "\""}' | sh
-    # awk > /tmp/awk.$$ -v pkg="$pkg" '{if (pkg != $1) print $0}' /etc/setup/installed.db
-    # rm -f "/etc/postinstall/$pkg.sh.done" "/etc/preremove/$pkg.sh" "/etc/setup/$pkg.lst.gz"
-    # mv /etc/setup/installed.db /etc/setup/installed.db-save
-    # mv /tmp/awk.$$ /etc/setup/installed.db
-  
+    gzip -cd "/etc/setup/$pkg.lst.gz" | awk '/[^\/]$/ {print "rm -f \"/" $0 "\""}' | sh
+    awk > /tmp/awk.$$ -v pkg="$pkg" '{if (pkg != $1) print $0}' /etc/setup/installed.db
+    rm -f "/etc/postinstall/$pkg.sh.done" "/etc/preremove/$pkg.sh" "/etc/setup/$pkg.lst.gz"
+    mv /etc/setup/installed.db /etc/setup/installed.db-save
+    mv /tmp/awk.$$ /etc/setup/installed.db
+  }
   done
   echo Done.
 }
@@ -59,6 +60,6 @@ function medy-upgrade {
     echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
     remove-without-resolve-dep "$(echo ${target[@]})"
-    # medy-install "$(echo ${target[@]})"
+    medy-install "$(echo ${target[@]})"
   fi
 }
