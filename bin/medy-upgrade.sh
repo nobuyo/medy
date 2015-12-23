@@ -22,8 +22,6 @@ function remove-to-upgrade {
 }
 
 function medy-upgrade {
-  # TODO
-  # Remove package without resolve dep
 
   setlab
   getsetup

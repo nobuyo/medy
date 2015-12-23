@@ -26,6 +26,9 @@ function medy-remove {
 }
 
 function verify-remove {
+  # TODO
+  # avoid duplication in dontremovewithdep
+
   local dontremove=(cygwin coreutils gawk bzip2 tar xz wget aria2 bash)
   local dontremovewithdep=()
 
