@@ -1,5 +1,9 @@
 # TODO
 
+## Conversion the policy
+- [ ] installation with symbolic link
+- [ ] installation each version
+
 ## implementions
 - [ ] implement "clean"
 - [ ] implement "doctor"
@@ -14,6 +18,6 @@
 - [ ] display Progress bar
 
 ## refactoring
-- [ ] update version info
+- [x] update version info
 - [ ] change OUTPUT file(./bin/medy => ./medy)
-- [ ] localize loop intex 
+- [x] localize loop intex 
