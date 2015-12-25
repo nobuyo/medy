@@ -139,11 +139,39 @@ function suggest_subcommand {
       CORRECT="remove"
       ;;
 
+    updare|updade|uodate)
+      CORRECT="update"
+      ;;
+
+    uograde)
+      CORRECT="upgrade"
+      ;;
+
+    kist|lisr|last)
+      CORRECT="list"
+      ;;
+
+    serach|seatch|fnid|finf)
+      CORRECT="search"
+      ;;
     
+    indo|imfo)
+      CORRECT="info"
+      ;;
+
+    update-self|uograde-self|upgradeself|upgrade-sekf)
+      CORRECT="upgrade-self"
+      ;;
+
+    *)
+      exit 1
+      ;;
 
   esac
   echo "Did you mean this?"
-  echo; ask_user medy install ${ARGS[@]} || exit 1
+  echo; ask_user "medy $CORRECT ${ARGS[@]}" || exit 1
+  invoke_subcommand "$CORRECT" "${ARGS[@]}"
+
 }
 
 function invoke_subcommand {
