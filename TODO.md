@@ -14,7 +14,8 @@
 ## add function
 - [ ] display the difference on update setup.ini
 - [ ] usable cURL
-- [ ] Subcommand Completion
+- [x] Subcommand Completion
+	* [ ] more spelling patterns
 - [ ] display Progress bar
 
 ## refactoring
