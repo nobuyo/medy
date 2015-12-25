@@ -121,6 +121,13 @@ do
   fi
 done
 
+if [ `cygwin_arch` = "x86" ]; then
+  warning "x86 env detected: aria2 can't use --conditional-get, always download and overwrite"
+  ARIA2C=( "aria2c" "--allow-overwrite=true" )
+else
+  ARIA2C=( "aria2c" "--conditional-get" "--allow-overwrite" )
+fi
+
 function invoke_subcommand {
   local SUBCOMMAND="${@:1:1}"
   local ARGS=( "${@:2}" )

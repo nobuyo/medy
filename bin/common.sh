@@ -59,7 +59,9 @@ function get {
   elif is-available "wget" && [ $noisy_view = 0 ]; then
     command wget "$@" &>/dev/null
   else
-    warn "wget not installed."
+    warn wget is not installed, using lynx as fallback
+    set "${*: -1}"
+    lynx -source "$1" > "${1##*/}"
   fi
 }
 

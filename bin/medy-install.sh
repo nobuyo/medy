@@ -5,10 +5,10 @@ function medy-install {
   local script
 
   checkpackages "$@"
-  #setlab
-  noupdate=1
-  getsetup
+  setlab
   echo
+
+  mkdir -p /usr/local/Pharmacy
 
   for pkg do
     local already="$(grep -c "^$pkg " /etc/setup/installed.db)"
@@ -119,8 +119,8 @@ function medy-resume-install {
   # download all
 
   echo "Start downloading..."
-  get -O "$(cat /tmp/medy-downloads)" ||
-  {
+  ${ARIA2C[@]} --input-file /tmp/medy-downloads \
+                 `[ "$(cygwin_arch)" = "x86" ] || echo "--deferred-input"` ||  {
     echo -e "\e[1;34mInterrupted:\e[0m To resume installing, run \"medy resume-install\" ."
     exit 1
   }
