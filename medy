@@ -39,11 +39,9 @@
 #   esac
 # }
 
-medylogo="
-  ._ _  _  _|
-  | | |(/_(_|\/
-             /
-"
+#> echo export DEPLOY='true'
+export DEPLOY=true
+#> cat ./bin/common.sh | perl -ne 'print unless /^#!/'
 
 function get_fullpath {
   echo $(cd $(dirname $0); pwd)
@@ -51,29 +49,6 @@ function get_fullpath {
 
 lab_dir=$(get_fullpath ${BASH_SOURCE:-$0})
 medy="$lab_dir"/$(basename $0)
-
-function usage {
-  echo "medy: Install (or build) and remove Cygwin package"
-  echo "  \"medy install <package names>\" to install packages"
-  echo "  \"medy resume-install\"          to resume interrupted installing"
-  echo "  \"medy (remove|uninstall) <package names>\"  to remove packages"
-  echo "  \"medy update\"                  to update setup.ini"
-  echo "  \"medy list\"                    to show installed packages"
-  echo "  \"medy (search|find) <patterns>\"       to find packages"
-  echo "  \"medy info <package name>\"     to show package infomation"
-  echo "  \"medy upgrade-self\"            to upgrade medy"
-  echo ""
-  echo "Options:"
-  echo "  --force               : force install/remove/fetch trustedkeys"
-  echo "  --mirror, -m <url>    : set mirror server"
-  echo "  --help"
-  echo "  --version"
-}
-
-function medy-version {
-  echo "$medylogo"
-  echo "  medy version 0.01"
-}
 
 function warn {
   # color:yellow
@@ -120,12 +95,16 @@ function checkpackages {
 }
 
 function get {
-  if is-available "wget"; then
-    command wget "$@" &>/dev/null
+  if is-available "wget" && [ $noisy_view = 1 ]; then
+    command wget "$@"
   # elif is-available "curl"; then
   #   command curl -O "${@:2}"
+  elif is-available "wget" && [ $noisy_view = 0 ]; then
+    command wget "$@" &>/dev/null
   else
-    warn "wget not installed."
+    warn wget is not installed, using lynx as fallback
+    set "${*: -1}"
+    lynx -source "$1" > "${1##*/}"
   fi
 }
 
@@ -150,15 +129,19 @@ function setlab {
     cache="$(cygpath -au "$(awk '/last-cache/ {getline; print $1}' /etc/setup/setup.rc)")"
   fi
 
-  where_mirror $mirror
-  where_dir $cache
+  if [ $noisy_view = 1 ]; then
+    where_mirror $mirror
+    where_dir $cache
+  fi
 
   mkdir -p "$cache/$dir/$arch"
   cd "$cache/$dir/$arch"
   if [ -e setup.ini ]; then
+    export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
     return 0
   else
     getsetup
+    export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
     return 1
   fi
 }
@@ -177,84 +160,6 @@ function getsetup {
   fi
 }
 
-function medy-update {
-  setlab
-  getsetup
-}
-
-function medy-upgrade-self {
-  mv $medy $lab_dir/medy.orig
-  get -Oq "https://raw.githubusercontent.com/nobuyo/medy/master/medy" -P /lab_dir
-  if [ $? -ne 0 ]; then
-    error "medy Could not found, reverting"
-    $lab_dir/medy.orig $medy
-  fi
-
-  chmod 775 $medy
-  success "Updated medy"
-}
-
-function medy-help {
-  usage
-}
-
-
-
-OPT_FILES=()
-SUBCOMMAND=""
-YES_TO_ALL=false
-force=""
-INITIAL_ARGS=( "$@" )
-ARGS=()
-while [ $# -gt 0 ]
-do
-  case "$1" in
-
-    --force)
-      force=1
-      shift
-    ;;
-
-    --mirror|-m)
-      echo "${2%/}/" > /etc/setup/last-mirror
-      shift ; shift
-    ;;
-
-    --yes-to-all|-y)
-      YES_TO_ALL=1
-      shift
-    ;;
-
-    --help)
-      usage
-      exit 0
-    ;;
-
-    --version)
-      version
-      exit 0
-    ;;
-
-    *)
-      if [ -z "$SUBCOMMAND" ]; then
-        SUBCOMMAND="$1"
-      else
-        ARGS+=( "$1" )
-      fi
-      shift
-    ;;
-  esac
-done
-
-for file in "${OPT_FILES[@]}"
-do
-  if [ -f "$file" ]; then
-    readarray -t -O ${#ARGS[@]} ARGS < "$file"
-  else
-    warning "File $file not found, skipping"
-  fi
-done
-
 function ask_user {
   while true
   do
@@ -271,30 +176,37 @@ function ask_user {
     esac
   done
 }
+#> cat ./bin/medy-*.sh | perl -ne 'print unless /^#!/'
 
-
-function medy-list {
-    echo 1>&2 The installed packages as follows:
-    awk '/[^ ]+ [^ ]+ 0/ {print $1}' /etc/setup/installed.db
+function medy-doctor {
+  # check dependencies of installed packages
+  echo "\"doctor\" coming soon, exiting"
 }
 
-function medy-search {
-  local pkg
+function medy-find {
+  medy-search "$@"
+}
 
-  checkpackages "$@"
-  #setlab
+function medy-help {
+  usage
+}
 
-    for pkg do
-      echo ""
-      echo "Searching..."
-      echo "from installed packages matching $pkg:"
-      awk '/[^ ]+ [^ ]+ 0/ {if ($1 ~ query) print $1}' query="$pkg" /etc/setup/installed.db
-      echo ""
-      echo "from installable packages matching $pkg:"
-      awk -v query="$pkg" \
-        'BEGIN{RS="\n\n@ "; FS="\n"; ORS="\n"} {if ($1 ~ query) {print $1}}' \
-        setup.ini
-    done
+function usage {
+  echo "medy: Install (or build) and remove Cygwin package"
+  echo "  \"medy install <package names>\" to install packages"
+  echo "  \"medy resume-install\"          to resume interrupted installing"
+  echo "  \"medy (remove|uninstall) <package names>\"  to remove packages"
+  echo "  \"medy update\"                  to update setup.ini"
+  echo "  \"medy list\"                    to show installed packages"
+  echo "  \"medy (search|find) <patterns>\"       to find packages"
+  echo "  \"medy info <package name>\"     to show package infomation"
+  echo "  \"medy upgrade-self\"            to upgrade medy"
+  echo ""
+  echo "Options:"
+  echo "  --force               : force install/remove/fetch trustedkeys"
+  echo "  --mirror, -m <url>    : set mirror server"
+  echo "  --help"
+  echo "  --version"
 }
 
 function medy-info {
@@ -343,10 +255,10 @@ function medy-install {
   local script
 
   checkpackages "$@"
-  #setlab
-  noupdate=1
-  getsetup
+  setlab
   echo
+
+  mkdir -p /usr/local/Pharmacy
 
   for pkg do
     local already="$(grep -c "^$pkg " /etc/setup/installed.db)"
@@ -410,7 +322,8 @@ function resolve_deps {
 
       # resolve dependencies
 
-      local requires="$(grep "^requires: " "release/$pkg/desc" | sed -re 's/^requires: *(.*[^ ]) */\1/g' -e 's/ +/ /g')"
+      local requires="$(grep "^requires: " "release/$pkg/desc" |\
+        sed -re 's/^requires: *(.*[^ ]) */\1/g' -e 's/ +/ /g')"
 
       local warn=0
 
@@ -456,8 +369,8 @@ function medy-resume-install {
   # download all
 
   echo "Start downloading..."
-  get -O "$(cat /tmp/medy-downloads)" ||
-  {
+  ${ARIA2C[@]} --input-file /tmp/medy-downloads \
+                 `[ "$(cygwin_arch)" = "x86" ] || echo "--deferred-input"` ||  {
     echo -e "\e[1;34mInterrupted:\e[0m To resume installing, run \"medy resume-install\" ."
     exit 1
   }
@@ -521,38 +434,55 @@ function quit {
   exit
 }
 
+
+function medy-list {
+    echo 1>&2 The installed packages as follows:
+    awk '/[^ ]+ [^ ]+ 0/ {print $1}' /etc/setup/installed.db
+}
+
 function medy-remove {
-    local pkg
-    local req
-    valid=0
+  local pkg
+  local req
+  valid=0
 
-    setlab
-    checkpackages "$@"
+  setlab
+  checkpackages "$@"
 
-    echo
+  echo
 
-    CURRENT=""
-    for pkg in $@
-    do
-      if [ ! -e "/etc/setup/$pkg.lst.gz" -a -z "$force" ]; then
-        echo Package manifest missing, cannot remove $pkg.
-        continue
-      fi
-      valid=1
-      CURRENT=( ${CURRENT[@]} $pkg )
-    done
+  CURRENT=""
+  for pkg in $@
+  do
+    if [ ! -e "/etc/setup/$pkg.lst.gz" -a -z "$force" ]; then
+      echo Package manifest missing, cannot remove $pkg.
+      continue
+    fi
+    valid=1
+    CURRENT=( ${CURRENT[@]} $pkg )
+  done
 
-    [ $valid = 1 ] || exit -1
-    remove-dep
+  [ $valid = 1 ] || exit -1
+  remove-dep
 }
 
 function verify-remove {
-  for req in $dontremove
-  do
-    local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
-    if [ "$1" = "$req" ]; then
-      echo; error "medy cannot remove package $p, exiting"
-      return 1
+  # TODO
+  # avoid duplication in dontremovewithdep
+
+  local dontremove=(cygwin coreutils gawk bzip2 tar xz wget aria2 bash)
+  local dontremovewithdep=()
+
+  for dep in ${dontremove[@]}; do
+    dontremovewithdep+="$(pkg-depends $dep) "
+  done
+
+  remove_skip=0
+  for req in ${dontremovewithdep[@]}; do
+    if [[ $1 = $req ]] && [ $remove_skip = 0 ]; then
+      warn "medy cannot remove package $1, skipping"
+      remove_skip=1
+    elif [ $remove_skip = 0 ]; then
+      remove_skip=0
     fi
   done
 }
@@ -576,17 +506,14 @@ function remove-dep {
       removing=`echo ${REMOVE[@]} | grep -c $p`
       ([ $already -gt 0 ] && [ $removing = 0 ]) || continue
 
-
-      verify-remove $p
-
-      # local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
-      # for req in $dontremove
-      # do
-      #   if [ "$p" = "$req" ]; then
-      #     echo; error "medy cannot remove package $p, exiting"
-      #     exit 1
-      #   fi
-      # done
+      local dontremove="cygwin coreutils gawk bzip2 tar xz wget aria2 bash"
+      for req in $dontremove
+      do
+        if [ "$p" = "$req" ]; then
+          echo; error "medy cannot remove package $p, exiting"
+          exit 1
+        fi
+      done
 
       REMOVE=( ${REMOVE[@]} $p )
       do_remove=1
@@ -633,18 +560,56 @@ function remove-dep {
   exit
 }
 
+function medy-search {
+  local pkg
+
+  checkpackages "$@"
+  setlab
+  
+  for pkg do
+    echo ""
+    echo "Searching..."
+    echo "from installed packages matching $pkg:"
+    awk '/[^ ]+ [^ ]+ 0/ {if ($1 ~ query) print $1}' query="$pkg" /etc/setup/installed.db
+    echo ""
+    echo "from installable packages matching $pkg:"
+    awk -v query="$pkg" \
+      'BEGIN{RS="\n\n@ "; FS="\n"; ORS="\n"} {if ($1 ~ query) {print $1}}' \
+      setup.ini
+  done
+}
+
 function medy-uninstall {
   medy-remove "$@"
 }
 
-function medy-find {
-  medy-search "$@"
+function medy-update {
+  setlab
+  getsetup
+}
+
+function remove-to-upgrade {
+  for pkg in $@;
+  do
+    verify-remove $pkg
+    if [ $remove_skip = 0 ]; then
+      echo Removing: $pkg
+
+      if [ -e "/etc/preremove/$pkg.sh" ]; then
+        "/etc/preremove/$pkg.sh"
+      fi
+
+      gzip -cd "/etc/setup/$pkg.lst.gz" | awk '/[^\/]$/ {print "rm -f \"/" $0 "\""}' | sh
+      awk > /tmp/awk.$$ -v pkg="$pkg" '{if (pkg != $1) print $0}' /etc/setup/installed.db
+      rm -f "/etc/postinstall/$pkg.sh.done" "/etc/preremove/$pkg.sh" "/etc/setup/$pkg.lst.gz"
+      mv /etc/setup/installed.db /etc/setup/installed.db-save
+      mv /tmp/awk.$$ /etc/setup/installed.db
+    fi
+  done
+  echo Done.
 }
 
 function medy-upgrade {
-  # TODO
-  # escape '+' for serching update
-  # for example "gcc-g++"
 
   setlab
   getsetup
@@ -671,22 +636,192 @@ function medy-upgrade {
     tarcurrent="${infocurrent%.*.*}"
 
     if [ "$tarcurrent" != "$tarbase" ]; then
-      echo "$tarbase => $tarcurrent"
+      echo -e "$tarbase \033[32m==>\033[m $tarcurrent"
       target+="$pkgname "
     fi
   done
 
   sed -i '$d' $cache/$dir/$arch/setup.ini
 
-  echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
+  if [ $DRY_RUN != 1 ]; then
+    echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
-  # medy-remove "$(echo ${target[@]})"
-  # medy-install "$(echo ${target[@]})"
+    # backup
+    echo ${target[@]} > $cache/$dir/$arch/medy-update-target.dat
+
+    # TODO
+    # implement resume-upgrade
+
+    echo Start Removing...
+    remove-to-upgrade "$(echo ${target[@]})"
+    echo Start Reinstalling...
+    medy-install "$(echo ${target[@]})"
+
+    # if [ $? = 0 ]; then
+    #   rm $cache/$dir/$arch/medy-update-target.dat
+    # fi
+  fi
 }
 
-function medy-doctor {
-  # check dependencies of installed packages
-  echo "\"doctor\" coming soon, exiting"
+function medy-upgrade-self {
+  mv $medy $lab_dir/medy.orig
+  get -Oq "https://raw.githubusercontent.com/nobuyo/medy/master/medy" -P /lab_dir
+  if [ $? -ne 0 ]; then
+    error "medy Could not found, reverting"
+    $lab_dir/medy.orig $medy
+  fi
+
+  chmod 775 $medy
+  success "Updated medy"
+}
+
+
+  # ._ _  _  _|
+  # | | |(/_(_|\/
+  #            /
+
+
+medylogo="
+  ._ _  _  _\033[31m|\033[m
+\033[31m  | | |\033[m(/_(_\033[31m|\033[m\033[34m\/\033[m
+             /
+"
+function medy-version {
+  echo -e "$medylogo"
+  echo "  version 0.0.5-alpha(\"holy\"-nightly build)"
+  echo ""
+}
+
+function include {
+  if [ "$DEPLOY" = 'true' ]; then return; fi
+  for file in $@; do
+    test -f "$file" && source "$file"
+  done
+}
+
+include ./bin/common.sh
+include ./bin/medy-*.sh
+include ./bin/perl-module/*.sh
+
+OPT_FILES=()
+SUBCOMMAND=""
+YES_TO_ALL=false
+force=""
+DRY_RUN=false
+noisy_view=0
+INITIAL_ARGS=( "$@" )
+ARGS=()
+while [ $# -gt 0 ]
+do
+  case "$1" in
+
+    --force)
+      force=1
+      shift
+    ;;
+
+    --mirror|-m)
+      echo "${2%/}/" > /etc/setup/last-mirror
+      shift ; shift
+    ;;
+
+    --yes-to-all|-y)
+      YES_TO_ALL=1
+      shift
+    ;;
+
+    --dry-run)
+      DRY_RUN=1
+      shift
+    ;;
+
+    --view|-v)
+      noisy_view=1
+      shift
+    ;;
+
+    --help)
+      medy-help
+      exit 0
+    ;;
+
+    --version|-V)
+      medy-version
+      exit 0
+    ;;
+
+    *)
+      if [ -z "$SUBCOMMAND" ]; then
+        SUBCOMMAND="$1"
+      else
+        ARGS+=( "$1" )
+      fi
+      shift
+    ;;
+  esac
+done
+
+for file in "${OPT_FILES[@]}"
+do
+  if [ -f "$file" ]; then
+    readarray -t -O ${#ARGS[@]} ARGS < "$file"
+  else
+    warning "File $file not found, skipping"
+  fi
+done
+
+if [ `cygwin_arch` = "x86" ]; then
+  warning "x86 env detected: aria2 can't use --conditional-get, always download and overwrite"
+  ARIA2C=( "aria2c" "--allow-overwrite=true" )
+else
+  ARIA2C=( "aria2c" "--conditional-get" "--allow-overwrite" )
+fi
+
+function suggest_subcommand {
+  local CORRECT=""
+  case "$1" in
+    intsall|instll|insatall|instoll)
+      CORRECT="install"
+      ;;
+
+    remobe|rimove|remov|rmove)
+      CORRECT="remove"
+      ;;
+
+    updare|updade|uodate)
+      CORRECT="update"
+      ;;
+
+    uograde)
+      CORRECT="upgrade"
+      ;;
+
+    kist|lisr|last)
+      CORRECT="list"
+      ;;
+
+    serach|seatch|fnid|finf)
+      CORRECT="search"
+      ;;
+    
+    indo|imfo)
+      CORRECT="info"
+      ;;
+
+    update-self|uograde-self|upgradeself|upgrade-sekf)
+      CORRECT="upgrade-self"
+      ;;
+
+    *)
+      exit 1
+      ;;
+
+  esac
+  echo; echo "Did you mean this?"
+  echo -ne "\033[36m==> \033[m"
+  ask_user "medy $CORRECT ${ARGS[@]}" || exit 1
+  invoke_subcommand "$CORRECT" "${ARGS[@]}"
+
 }
 
 function invoke_subcommand {
@@ -697,7 +832,7 @@ function invoke_subcommand {
     "$ACTION" "${ARGS[@]}"
   else
     error "unknown command: $SUBCOMMAND"
-    exit 1
+    suggest_subcommand $SUBCOMMAND
   fi
 }
 
