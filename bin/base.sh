@@ -42,6 +42,7 @@
 #> echo export DEPLOY='true'
 #> cat ./bin/common.sh | perl -ne 'print unless /^#!/'
 #> cat ./bin/medy-*.sh | perl -ne 'print unless /^#!/'
+#> cat ./bin/perl-module/*.sh | perl -ne 'print unless /^#!/'
 
 function include {
   if [ "$DEPLOY" = 'true' ]; then return; fi
@@ -51,8 +52,8 @@ function include {
 }
 
 include ./bin/common.sh
-include ./bin/medy-*.sh
 include ./bin/perl-module/*.sh
+include ./bin/medy-*.sh
 
 OPT_FILES=()
 SUBCOMMAND=""

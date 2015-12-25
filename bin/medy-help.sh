@@ -18,6 +18,8 @@ function usage {
   echo "Options:"
   echo "  --force               : force install/remove/fetch trustedkeys"
   echo "  --mirror, -m <url>    : set mirror server"
+  echo "  --view, -v            : show process info"
+  echo "  --dry-run"
   echo "  --help"
   echo "  --version"
 }
