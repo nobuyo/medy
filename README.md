@@ -13,6 +13,9 @@ filename(assumed dir) ... desc
 - installed.db(/etc/setup/installed.db) ... list of installed package on each Cygwin
 - setup.rc(/etc/setup/setup.rc) ... infomation of mirror, last mirror, and cache directory
 
+#### todo
+- [TODO](https://github.com/nobuyo/medy/blob/master/TODO.md)
+
 ## Official
 This script heavy based on these scripts:
 - [apt-cyg](https://github.com/transcode-open/apt-cyg)
