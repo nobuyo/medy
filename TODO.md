@@ -7,8 +7,8 @@
 ## implementions
 - [ ] implement "clean"
 - [ ] implement "doctor"
-	* medy version check
-	* check local files and installed.db
+	* [ ]medy version check
+	* [ ]check local files and installed.db
 - [ ] implement "build"
 
 ## add function
