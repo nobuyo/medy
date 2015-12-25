@@ -168,8 +168,9 @@ function suggest_subcommand {
       ;;
 
   esac
-  echo "Did you mean this?"
-  echo; ask_user "medy $CORRECT ${ARGS[@]}" || exit 1
+  echo; echo "Did you mean this?"
+  echo -ne "\033[36m==> \033[m"
+  ask_user "medy $CORRECT ${ARGS[@]}" || exit 1
   invoke_subcommand "$CORRECT" "${ARGS[@]}"
 
 }
