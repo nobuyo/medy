@@ -36,8 +36,10 @@ function verify-remove {
     dontremovewithdep+="$(pkg-depends $dep) "
   done
 
+  dontremove="$(echo $dontremovewithdep | sed -e 's/\s/\n/g' | sort -u | uniq )"
+
   remove_skip=0
-  for req in ${dontremovewithdep[@]}; do
+  for req in ${dontremove[@]}; do
     if [[ $1 = $req ]] && [ $remove_skip = 0 ]; then
       warn "medy cannot remove package $1, skipping"
       remove_skip=1

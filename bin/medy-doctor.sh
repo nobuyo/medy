@@ -2,22 +2,18 @@
 
 function medy-doctor {
   # check dependencies of installed packages
-  # local installed="$(awk '{print $1}' /etc/setup/installed.db | tail -n +2 )"
-  # local checklist=()
-  # local pkg
+  local installed="$(awk '{print $1}' /etc/setup/installed.db | tail -n +2 )"
+  local checklist=()
+  local pkg
+  local ready=1
 
-  # for pkg in $installed;
-  # do
-  # 	checklist+="$(pkg-depends $pkg) "
-  # done
 
-  # for pkg in $checklist;
-  # do
-  # 	is-available $pkg || {
-  #     echo "$pkg is not available"
-  #     echo "Please try medy install $pkg"
-  # 	}
-  # done
+  for pkg in $installed;
+  do
+  	is-available $pkg || echo "$pkg is not available"; ready=0
+  done
 
-  echo "doctor"
+  if [ "$ready" = 1 ]; then
+    echo "doctor: Your system is healty, ready to medy"
+  fi
 }
