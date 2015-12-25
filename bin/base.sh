@@ -128,6 +128,10 @@ else
   ARIA2C=( "aria2c" "--conditional-get" "--allow-overwrite" )
 fi
 
+function suggest_subcommand {
+  :
+}
+
 function invoke_subcommand {
   local SUBCOMMAND="${@:1:1}"
   local ARGS=( "${@:2}" )
