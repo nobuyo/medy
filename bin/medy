@@ -154,6 +154,7 @@ function getsetup {
     bunzip2 setup.bz2
     mv setup setup.ini
     success "Updated setup.ini"
+    diff setup.ini setup.ini-save
   else
     error "Updateing setup.ini, reverting"
     mv setup.ini-save setup.ini
@@ -818,7 +819,7 @@ function suggest_subcommand {
 
   esac
   echo; echo "Did you mean this?"
-  echo -ne "\033[36m==>\033[m"
+  echo -ne "\033[36m==> \033[m"
   ask_user "medy $CORRECT ${ARGS[@]}" || exit 1
   invoke_subcommand "$CORRECT" "${ARGS[@]}"
 
