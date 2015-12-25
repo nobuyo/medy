@@ -4,7 +4,10 @@ package manager for cygwin(developing, not yet available)
 ## requires
 medy requires requires the cygwin default environment and optional packages below.
 
-- wget
+- aria2
+- tar
+- bzip2
+- xz
 
 ## for contributors
 ####file description

@@ -129,7 +129,21 @@ else
 fi
 
 function suggest_subcommand {
-  :
+  local CORRECT=""
+  case "$1" in
+    intsall|instll|insatall|instoll)
+      CORRECT="install"
+      ;;
+
+    remobe|rimove|remov|rmove)
+      CORRECT="remove"
+      ;;
+
+    
+
+  esac
+  echo "Did you mean this?"
+  echo; ask_user medy install ${ARGS[@]} || exit 1
 }
 
 function invoke_subcommand {
@@ -140,7 +154,7 @@ function invoke_subcommand {
     "$ACTION" "${ARGS[@]}"
   else
     error "unknown command: $SUBCOMMAND"
-    exit 1
+    suggest_subcommand $SUBCOMMAND
   fi
 }
 
