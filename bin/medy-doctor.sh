@@ -21,6 +21,6 @@ function medy-doctor {
   if [ "$ready" = 1 ]; then
     echo "Your system is healty, ready to medy"
   else
-    
+    :
   fi
 }
