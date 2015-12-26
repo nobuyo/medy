@@ -25,7 +25,7 @@ function medy-info {
 
   if [ "$info" == "" ]; then
     error "Unable to find $1"
-    return
+    return 1
   fi
 
   local current_version="$(grep "^$1" /etc/setup/installed.db | awk '{print $2}')"

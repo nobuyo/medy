@@ -185,10 +185,15 @@ function medy-doctor {
   local pkg
   local ready=1
 
+  echo -n "Checking...."
 
   for pkg in $installed;
   do
-  	is-available $pkg || echo "$pkg is not available"; ready=0
+  	is-available $pkg ||
+    medy-info $pkg &>/dev/null  || {
+      echo "$pkg is not available"
+      ready=0
+    }
   done
 
   if [ "$ready" = 1 ]; then
@@ -251,7 +256,7 @@ function medy-info {
 
   if [ "$info" == "" ]; then
     error "Unable to find $1"
-    return
+    return 1
   fi
 
   local current_version="$(grep "^$1" /etc/setup/installed.db | awk '{print $2}')"

@@ -7,10 +7,15 @@ function medy-doctor {
   local pkg
   local ready=1
 
+  echo "Checking...."
 
   for pkg in $installed;
   do
-  	is-available $pkg || echo "$pkg is not available"; ready=0
+  	is-available $pkg ||
+    medy-info $pkg &>/dev/null  || {
+      echo "$pkg is not available"
+      ready=0
+    }
   done
 
   if [ "$ready" = 1 ]; then
