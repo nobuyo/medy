@@ -2,7 +2,7 @@
 package manager for cygwin(developing, not yet available)
 
 ## requires
-medy requires requires the cygwin default environment and optional packages below.
+medy requires the cygwin default environment and optional packages below.
 
 - aria2
 - tar
