@@ -15,6 +15,7 @@ function medy-info {
   fi
 
   setlab
+  # export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
 
   local info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
@@ -30,10 +31,16 @@ function medy-info {
 
   local current_version="$(grep "^$1" /etc/setup/installed.db | head -1 | awk '{print $2}')"
 
-  local info_desc="$(echo "$info" | head -n -3 | tail -n +2)"
-  local info_version="$(echo "$info" | tail -1)"
-  local info_require="$(echo "$info" | tail -2 | head -1)"
-  local info_category="$(echo "$info" | tail -3 | head -1)"
+  # local info_desc="$(echo "$info" | head -n -3 | tail -n +2)"
+  # local info_version="$(echo "$info" | tail -1)"
+  # local info_require="$(echo "$info" | tail -2 | head -1)"
+  # local info_category="$(echo "$info" | tail -3 | head -1)"
+
+  local info_desc="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 sdesc)"
+  local info_version="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 version)"
+  local info_require="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 requires)"
+  local info_category="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 category)"
+
 
   echo -e "\033[35;4m Infomation \033[m"
   echo "$1"
