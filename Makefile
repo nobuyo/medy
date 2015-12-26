@@ -22,4 +22,3 @@ recombine:
 deploy:
 	cp -f $(BUILD_FILE) /bin/medy
 	chmod +x /bin/medy
-

@@ -20,6 +20,11 @@ medy provides the following additional features as compared to the originals:
 
 ## Operations
 about subcommands and options
+
+~~~ bash
+$ medy <SUBCOMMAND> <OPTION> <ARGS>
+~~~
+
 ### Subcommand
 ~~~ bash
 install
