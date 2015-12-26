@@ -248,7 +248,7 @@ function medy-info {
   fi
 
   setlab
-  # export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
+  export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
 
   local info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
@@ -269,10 +269,10 @@ function medy-info {
   # local info_require="$(echo "$info" | tail -2 | head -1)"
   # local info_category="$(echo "$info" | tail -3 | head -1)"
 
-  local info_desc="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 sdesc)"
-  local info_version="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 version)"
-  local info_require="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 requires)"
-  local info_category="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 category)"
+  local info_desc="$(setup-parser $1 sdesc)"
+  local info_version="$(setup-parser $1 version)"
+  local info_require="$(setup-parser $1 requires)"
+  local info_category="$(setup-parser $1 category)"
 
 
   echo -e "\033[35;4m Infomation \033[m"
@@ -745,7 +745,7 @@ function medy-version {
 #> cat ./bin/perl-module/*.sh | perl -ne 'print unless /^#!/'
 
 function pkg-depends {
-perl -e '
+perl -e "$(cat <<'EOC'
 # 
 #   pkg-depends.pl -- show the depended packages of given package name
 # 
@@ -753,7 +753,7 @@ perl -e '
 #   $package_name <- $ARGV[0]
 # 
 # input:
-#   if a enviroment variable "SETUP_INI_FILE_PATH" is exported, input from its file.
+#   if a enviroment variable 'SETUP_INI_FILE_PATH' is exported, input from its file.
 #   otherwise, input from stdin.
 #   how output the nested all requirements of Vim is as follows:
 # 
@@ -764,7 +764,7 @@ perl -e '
 # 
 # return:
 #   print the depended packages of given package name.
-#   return -1 if package name is not found in file $ENV{"SETUP_INI_FILE_PATH"}.
+#   return -1 if package name is not found in file $ENV{'SETUP_INI_FILE_PATH'}.
 # 
 
 use strict;
@@ -784,10 +784,10 @@ sub usage {
 # return the structure like:
 # 
 #     (
-#         "4ti2-debuginfo" => ["cygwin-debuginfo"],
-#         "a2ps"           => ["bash", "libiconv2", "libintl8", "libpaper1", ..., "cygwin"],
+#         '4ti2-debuginfo' => ['cygwin-debuginfo'],
+#         'a2ps'           => ['bash', 'libiconv2', 'libintl8', 'libpaper1', ..., 'cygwin'],
 #           :
-#         "zsh"            => ["cygwin", "libncursesw10", "libpcre1", "libiconv2", "libgdbm4", "_update-info-dir"]
+#         'zsh'            => ['cygwin', 'libncursesw10', 'libpcre1', 'libiconv2', 'libgdbm4', '_update-info-dir']
 #     )
 # 
 sub create_requirements_table {
@@ -795,7 +795,7 @@ sub create_requirements_table {
 
 	# select input (file or stdin)
 	my $in;
-	my $target_file = $ENV{"SETUP_INI_FILE_PATH"};
+	my $target_file = $ENV{'SETUP_INI_FILE_PATH'};
 	if ($target_file) {
 		open($in, "< $target_file") or die("could not open file \"$target_file\"");
 	} else {
@@ -833,7 +833,7 @@ sub fetch_pkg_depends {
 	my @requires = @{ $pkg_requirements_table->{$pkg_name} || [] };
 
 	# print "begin: $nest\n";
-	# print join(" ", keys %require_pkgs) . "\n";
+	# print join(' ', keys %require_pkgs) . "\n";
 
 	foreach (@requires) {
 		my $require_pkg = $_;
@@ -862,21 +862,22 @@ if (__FILE__ eq $0) {
 
 
 
-' -- $@
+EOC
+)" -- $@
 }
 
 function setup-parser {
-perl -e '
+perl -e "$(cat <<'EOC'
 # 
 #   setup-parser.pl -- perser to read setup.int
 # 
 # args:
 #   $package_name <- $ARGV[0]
 #   $tag_name     <- $ARGV[1]
-#     where $tag_name = "sdesc", "ldesc", "category", "requires", "version", "install", undef
+#     where $tag_name = 'sdesc', 'ldesc', 'category', 'requires', 'version', 'install', undef
 # 
 # input:
-#   if a enviroment variable "SETUP_INI_FILE_PATH" is exported, input from its file.
+#   if a enviroment variable 'SETUP_INI_FILE_PATH' is exported, input from its file.
 #   otherwise, input from stdin.
 #   how output the requirements of Vim is as follows:
 #   
@@ -888,7 +889,7 @@ perl -e '
 # return:
 #   return -1 if package name is not found in input.
 #   return -1 if tag name is invalid.
-#   if $tag_name is not specified, print $package_name"s info.
+#   if $tag_name is not specified, print $package_name's info.
 #   otherwise, print the tagged content of $package_name.
 # 
 
@@ -911,12 +912,12 @@ sub usage {
 sub format_pkg_all_info {
 	my ($pkg_info) = @_;
 	my @each_lines = (
-		"sdesc: $pkg_info->{"sdesc"}",
-		"ldesc: \n" . join("", @{$pkg_info->{"ldesc"}}),
-		"category: $pkg_info->{"category"}",
-		"requires: $pkg_info->{"requires"}",
-		"version: $pkg_info->{"version"}",
-		"install: $pkg_info->{"install"}",
+		"sdesc: "    . $pkg_info->{'sdesc'},
+		"ldesc: \n"  . join("", @{ $pkg_info->{'ldesc'} }),
+		"category: " . $pkg_info->{'category'},
+		"requires: " . $pkg_info->{'requires'},
+		"version: "  . $pkg_info->{'version'},
+		"install: "  . $pkg_info->{'install'},
 		"" # ends with \n
 	);
 	return join("\n", @each_lines);
@@ -929,8 +930,8 @@ sub format_pkg_info {
 		return format_pkg_all_info(\%$pkg_info);
 	}
 
-	if (ref $pkg_info->{$tag} eq "ARRAY") {
-		return join("", @{$pkg_info->{$tag}})
+	if (ref $pkg_info->{$tag} eq 'ARRAY') {
+		return join('', @{$pkg_info->{$tag}});
 	} else {
 		return "$pkg_info->{$tag}\n";
 	}
@@ -946,25 +947,25 @@ sub extract_from_setup_init {
 	# use for loop
 	my $found_pkg = 0; # false
 	my %pkg_info = (
-		"sdesc" => "",
-		"ldesc" => [
+		'sdesc' => '',
+		'ldesc' => [
 			# each lines
 		],
-		"category" => "",
-		"requires" => "",
-		"version" => "",
-		"install" => ""
+		'category' => '',
+		'requires' => '',
+		'version' => '',
+		'install' => ''
 	);
 	# use for extracting ldesc
 	my $on_ldesc = 0; # false
 
 	# select input (file or stdin)
 	my $in;
-	my $target_file = $ENV{"SETUP_INI_FILE_PATH"};
+	my $target_file = $ENV{'SETUP_INI_FILE_PATH'};
 	if ($target_file) {
 		open($in, "< $target_file") or die("could not open file \"$target_file\"");
 	} else {
-		$in = *STDIN
+		$in = *STDIN;
 	}
 
 	while (<$in>) {
@@ -980,7 +981,7 @@ sub extract_from_setup_init {
 
 		# sdesc
 		if (/^sdesc: "([^"]*+)"$/) {
-			$pkg_info{"sdesc"} = $1;
+			$pkg_info{'sdesc'} = $1;
 			next;
 		}
 
@@ -989,13 +990,13 @@ sub extract_from_setup_init {
 			$on_ldesc = 1; # true
 		}
 		if (/^ldesc: "([^"]*+)("?)$/) {
-			push(@{$pkg_info{"ldesc"}}, $1);
+			push(@{$pkg_info{'ldesc'}}, $1);
 			# when double quote is on end of line, on_ldesc is false.
 			$on_ldesc = 0 if ($2);
 			next;
 		}
 		if ($on_ldesc && /^([^"]*+)("?)$/) {
-			push(@{$pkg_info{"ldesc"}}, $1);
+			push(@{$pkg_info{'ldesc'}}, $1);
 			# when double quote is on end of line, on_ldesc is false.
 			$on_ldesc = 0 if ($2);
 			next;
@@ -1046,7 +1047,8 @@ if (__FILE__ eq $0) {
 	1;
 }
 
-' -- $@
+EOC
+)" -- $@
 }
 
 function include {

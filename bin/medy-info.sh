@@ -15,7 +15,7 @@ function medy-info {
   fi
 
   setlab
-  # export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
+  export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
 
   local info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
@@ -36,10 +36,10 @@ function medy-info {
   # local info_require="$(echo "$info" | tail -2 | head -1)"
   # local info_category="$(echo "$info" | tail -3 | head -1)"
 
-  local info_desc="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 sdesc)"
-  local info_version="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 version)"
-  local info_require="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 requires)"
-  local info_category="$(cat $cache/$dir/$arch/setup.ini | perl $lab_dir/lib/setup-parser.pl $1 category)"
+  local info_desc="$(setup-parser $1 sdesc)"
+  local info_version="$(setup-parser $1 version)"
+  local info_require="$(setup-parser $1 requires)"
+  local info_category="$(setup-parser $1 category)"
 
 
   echo -e "\033[35;4m Infomation \033[m"
