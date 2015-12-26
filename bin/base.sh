@@ -58,6 +58,7 @@ include ./bin/medy-*.sh
 OPT_FILES=()
 SUBCOMMAND=""
 YES_TO_ALL=false
+LOCAL=0
 force=""
 DRY_RUN=false
 noisy_view=0
@@ -79,6 +80,11 @@ do
 
     --yes-to-all|-y)
       YES_TO_ALL=1
+      shift
+    ;;
+
+    --local)
+      LOCAL=1
       shift
     ;;
 

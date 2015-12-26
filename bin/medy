@@ -494,7 +494,7 @@ function verify-remove {
   dontremove="$(echo $dontremovewithdep | sed -e 's/\s/\n/g' | sort -u | uniq )"
 
   remove_skip=0
-  for req in ${dontremovewithdep[@]}; do
+  for req in ${dontremove[@]}; do
     if [[ $1 = $req ]] && [ $remove_skip = 0 ]; then
       warn "medy cannot remove package $1, skipping"
       remove_skip=1
@@ -588,11 +588,13 @@ function medy-search {
     echo "Searching..."
     echo "from installed packages matching $pkg:"
     awk '/[^ ]+ [^ ]+ 0/ {if ($1 ~ query) print $1}' query="$pkg" /etc/setup/installed.db
-    echo ""
-    echo "from installable packages matching $pkg:"
-    awk -v query="$pkg" \
-      'BEGIN{RS="\n\n@ "; FS="\n"; ORS="\n"} {if ($1 ~ query) {print $1}}' \
-      setup.ini
+    if [ "$LOCAL" = 0 ]; then
+      echo ""
+      echo "from installable packages matching $pkg:"
+      awk -v query="$pkg" \
+        'BEGIN{RS="\n\n@ "; FS="\n"; ORS="\n"} {if ($1 ~ query) {print $1}}' \
+        setup.ini
+    fi
   done
 }
 
@@ -1029,6 +1031,7 @@ include ./bin/medy-*.sh
 OPT_FILES=()
 SUBCOMMAND=""
 YES_TO_ALL=false
+LOCAL=0
 force=""
 DRY_RUN=false
 noisy_view=0
@@ -1050,6 +1053,11 @@ do
 
     --yes-to-all|-y)
       YES_TO_ALL=1
+      shift
+    ;;
+
+    --local)
+      LOCAL=1
       shift
     ;;
 
