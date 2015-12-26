@@ -261,7 +261,7 @@ function medy-info {
     return 1
   fi
 
-  local current_version="$(grep "^$1" /etc/setup/installed.db | awk '{print $2}')"
+  local current_version="$(grep "^$1" /etc/setup/installed.db | head -1 | awk '{print $2}')"
 
   local info_desc="$(echo "$info" | head -n -3 | tail -n +2)"
   local info_version="$(echo "$info" | tail -1)"
