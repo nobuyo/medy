@@ -5,7 +5,7 @@ BASE_FILE = ./bin/base.sh
 GEN_FILE  = ./bin/medy
 BUILD_FILE = ./medy
 
-.PHONY: combine recombine
+.PHONY: combine recombine deploy
 
 all: combine
 
@@ -18,3 +18,8 @@ $(GEN_FILE): $(BASE_FILE) ./bin/common.sh ./bin/medy-*.sh ./bin/perl-module/*.sh
 recombine:
 	@touch $(BASE_FILE)
 	@$(MAKE) combine
+
+deploy:
+	cp -f $BUILD_FILE /bin/medy
+	chmod +x /bin/medy
+
