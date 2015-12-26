@@ -2,7 +2,7 @@
 
 function medy-doctor {
   # check dependencies of installed packages
-  local installed="$(awk '{print $1}' /etc/setup/installed.db | tail -n +2 )"
+  local installed="$(awk '{print $1}' /etc/setup/installed.db | tail -n +2 | grep -v '^lib' )"
   local checklist=()
   local pkg
   local ready=1
