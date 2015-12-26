@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 
+function info-self {
+  medy-version
+  
+  setlab
+  where_mirror $mirror
+  where_dir $cache
+}
+
 function medy-info {
-  checkpackages "$@"
+  if [ $# -eq 1 ]; then
+    info-self
+  fi
   setlab
 
   info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\

@@ -23,11 +23,11 @@ function success {
 }
 
 function where_mirror {
-  echo "Mirror server is $1"
+  echo "Mirror server: $1"
 }
 
 function where_dir {
-  echo "Cache directory is $1"
+  echo "Cache directory: $1"
 }
 
 function cygwin_arch {
