@@ -6,6 +6,7 @@ function medy-help {
 
 function usage {
   echo "medy: Install (or build) and remove Cygwin package"
+  echo ""
   echo "  \"medy install <package names>\" to install packages"
   echo "  \"medy resume-install\"          to resume interrupted installing"
   echo "  \"medy (remove|uninstall) <package names>\"  to remove packages"
@@ -19,6 +20,7 @@ function usage {
   echo "  --force               : force install/remove/fetch trustedkeys"
   echo "  --mirror, -m <url>    : set mirror server"
   echo "  --view, -v            : show process info"
+  echo "  --local               : find package from local"
   echo "  --dry-run"
   echo "  --help"
   echo "  --version"
