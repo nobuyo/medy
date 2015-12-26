@@ -79,8 +79,18 @@ version
 
 --version
   Show version. 
+~~~
 
+## Quick start
+get it, deploy it, and make it executable.
+~~~ bash
+$ mv medy /bin/medy
+$ chmod +x /bin/medy
+~~~
 
+For example,
+~~~ bash
+$ medy install nano
 ~~~
 
 ## for contributors
