@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
 
+function info-self {
+  medy-version
+
+  setlab
+  echo -n "  " ;where_mirror $mirror
+  echo -n "  " ;where_dir $cache
+  exit 0
+}
+
 function medy-info {
-  checkpackages "$@"
+  if [ $# -eq 0 ]; then
+    info-self
+  fi
+
   setlab
 
-  info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
+  local info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
   grep -v 'ldesc\|install:\|source:' |\
   sed '/prev/,+2d' |\
@@ -13,13 +25,15 @@ function medy-info {
 
   if [ "$info" == "" ]; then
     error "Unable to find $1"
-    return
+    return 1
   fi
 
-  info_desc="$(echo "$info" | head -n -3 | tail -n +2)"
-  info_version="$(echo "$info" | tail -1)"
-  info_require="$(echo "$info" | tail -2 | head -1)"
-  info_category="$(echo "$info" | tail -3 | head -1)"
+  local current_version="$(grep "^$1" /etc/setup/installed.db | head -1 | awk '{print $2}')"
+
+  local info_desc="$(echo "$info" | head -n -3 | tail -n +2)"
+  local info_version="$(echo "$info" | tail -1)"
+  local info_require="$(echo "$info" | tail -2 | head -1)"
+  local info_category="$(echo "$info" | tail -3 | head -1)"
 
   echo -e "\033[35;4m Infomation \033[m"
   echo "$1"
@@ -35,7 +49,7 @@ function medy-info {
   echo -e "\033[35;4m Status \033[m"""
   grep "$1" /etc/setup/installed.db &> /dev/null
   if [ $? -eq 0 ]; then
-    echo "Installed"
+    echo "Installed (${current_version%.*.*})"
   else
     echo "Not installed"
   fi

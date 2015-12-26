@@ -23,11 +23,11 @@ function success {
 }
 
 function where_mirror {
-  echo "Mirror server is $1"
+  echo "Mirror server: $1"
 }
 
 function where_dir {
-  echo "Cache directory is $1"
+  echo "Cache directory: $1"
 }
 
 function cygwin_arch {
@@ -52,12 +52,16 @@ function checkpackages {
 }
 
 function get {
-  if is-available "wget"; then
-    command wget "$@" &>/dev/null
+  if is-available "wget" && [ $noisy_view = 1 ]; then
+    command wget "$@"
   # elif is-available "curl"; then
   #   command curl -O "${@:2}"
+  elif is-available "wget" && [ $noisy_view = 0 ]; then
+    command wget "$@" &>/dev/null
   else
-    warn "wget not installed."
+    warn wget is not installed, using lynx as fallback
+    set "${*: -1}"
+    lynx -source "$1" > "${1##*/}"
   fi
 }
 
@@ -82,15 +86,19 @@ function setlab {
     cache="$(cygpath -au "$(awk '/last-cache/ {getline; print $1}' /etc/setup/setup.rc)")"
   fi
 
-  where_mirror $mirror
-  where_dir $cache
+  if [ $noisy_view = 1 ]; then
+    where_mirror $mirror
+    where_dir $cache
+  fi
 
   mkdir -p "$cache/$dir/$arch"
   cd "$cache/$dir/$arch"
   if [ -e setup.ini ]; then
+    export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
     return 0
   else
     getsetup
+    export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
     return 1
   fi
 }

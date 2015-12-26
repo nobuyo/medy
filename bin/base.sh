@@ -42,6 +42,7 @@
 #> echo export DEPLOY='true'
 #> cat ./bin/common.sh | perl -ne 'print unless /^#!/'
 #> cat ./bin/medy-*.sh | perl -ne 'print unless /^#!/'
+#> cat ./bin/perl-module/*.sh | perl -ne 'print unless /^#!/'
 
 function include {
   if [ "$DEPLOY" = 'true' ]; then return; fi
@@ -51,12 +52,16 @@ function include {
 }
 
 include ./bin/common.sh
+include ./bin/perl-module/*.sh
 include ./bin/medy-*.sh
 
 OPT_FILES=()
 SUBCOMMAND=""
 YES_TO_ALL=false
+LOCAL=0
 force=""
+DRY_RUN=false
+noisy_view=0
 INITIAL_ARGS=( "$@" )
 ARGS=()
 while [ $# -gt 0 ]
@@ -78,13 +83,28 @@ do
       shift
     ;;
 
+    --local)
+      LOCAL=1
+      shift
+    ;;
+
+    --dry-run)
+      DRY_RUN=1
+      shift
+    ;;
+
+    --view)
+      noisy_view=1
+      shift
+    ;;
+
     --help)
-      usage
+      medy-help
       exit 0
     ;;
 
-    --version)
-      version
+    --version|-V)
+      medy-version
       exit 0
     ;;
 
@@ -108,6 +128,60 @@ do
   fi
 done
 
+if [ `cygwin_arch` = "x86" ]; then
+  warning "x86 env detected: aria2 can't use --conditional-get, always download and overwrite"
+  ARIA2C=( "aria2c" "--allow-overwrite=true" )
+else
+  ARIA2C=( "aria2c" "--conditional-get" "--allow-overwrite" )
+fi
+
+function suggest_subcommand {
+  local CORRECT=""
+  case "$1" in
+    intsall|instll|insatall|instoll)
+      CORRECT="install"
+      ;;
+
+    remobe|rimove|remov|rmove)
+      CORRECT="remove"
+      ;;
+
+    updare|updade|uodate)
+      CORRECT="update"
+      ;;
+
+    uograde)
+      CORRECT="upgrade"
+      ;;
+
+    kist|lisr|last)
+      CORRECT="list"
+      ;;
+
+    serach|seatch|fnid|finf)
+      CORRECT="search"
+      ;;
+    
+    indo|imfo)
+      CORRECT="info"
+      ;;
+
+    update-self|uograde-self|upgradeself|upgrade-sekf)
+      CORRECT="upgrade-self"
+      ;;
+
+    *)
+      exit 1
+      ;;
+
+  esac
+  echo; echo "Did you mean this?"
+  echo -ne "\033[36m==> \033[m"
+  ask_user "medy $CORRECT ${ARGS[@]}" || exit 1
+  invoke_subcommand "$CORRECT" "${ARGS[@]}"
+
+}
+
 function invoke_subcommand {
   local SUBCOMMAND="${@:1:1}"
   local ARGS=( "${@:2}" )
@@ -116,7 +190,7 @@ function invoke_subcommand {
     "$ACTION" "${ARGS[@]}"
   else
     error "unknown command: $SUBCOMMAND"
-    exit 1
+    suggest_subcommand $SUBCOMMAND
   fi
 }
 
