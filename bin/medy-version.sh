@@ -13,6 +13,5 @@ medylogo="
 "
 function medy-version {
   echo -e "$medylogo"
-  echo "  version 0.5.0(nightly build)"
-  echo ""
+  echo "  version 0.5.0
 }

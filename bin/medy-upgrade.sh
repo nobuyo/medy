@@ -1,5 +1,30 @@
 #!/usr/bin/env bash
 
+
+function verify-remove {
+  # TODO
+  # avoid duplication in dontremovewithdep
+
+  local dontremove=(cygwin coreutils gawk bzip2 tar xz wget aria2 bash)
+  local dontremovewithdep=()
+  
+  for dep in ${dontremove[@]}; do
+    dontremovewithdep+="$(pkg-depends $dep) "
+  done
+
+  dontremove="$(echo $dontremovewithdep | sed -e 's/\s/\n/g' | sort -u | uniq )"
+
+  remove_skip=0
+  for req in ${dontremove[@]}; do
+    if [[ $1 = $req ]] && [ $remove_skip = 0 ]; then
+      warn "medy cannot remove package $1, skipping"
+      remove_skip=1
+    elif [ $remove_skip = 0 ]; then
+      remove_skip=0
+    fi
+  done
+}
+
 function remove-to-upgrade {
   for pkg in $@;
   do
@@ -66,9 +91,9 @@ function medy-upgrade {
     # TODO
     # implement resume-upgrade
 
-    echo Start Removing...
+    echo -e "\033[36;4mStart Removing...\033[m"
     remove-to-upgrade "$(echo ${target[@]})"
-    echo Start Reinstalling...
+    echo -e "\033[36;4mStart Reinstalling...\033[m"
     medy-install "$(echo ${reinstall[@]})"
 
     # if [ $? = 0 ]; then
