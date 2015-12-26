@@ -7,15 +7,13 @@ BEGINFILE {
 	gsub(/^.*\//, "", filename)
 	gsub(/.pl$/, "", filename)
 	print "function", filename, "{"
-	print "perl -e '"
+	print "perl -e \"$(cat <<'EOC'"
 }
 
-{
-	gsub(/'/, "\"", $0)
-	print $0
-}
+{ print $0 }
 
 ENDFILE {
-	print "' -- $@"
+	print "EOC"
+	print ")\" -- $@"
 	print "}"
 }

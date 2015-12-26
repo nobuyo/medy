@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function pkg-depends {
-perl -e '
+perl -e "$(cat <<'EOC'
 #!/usr/bin/perl
 # 
 #   pkg-depends.pl -- show the depended packages of given package name
@@ -10,7 +10,7 @@ perl -e '
 #   $package_name <- $ARGV[0]
 # 
 # input:
-#   if a enviroment variable "SETUP_INI_FILE_PATH" is exported, input from its file.
+#   if a enviroment variable 'SETUP_INI_FILE_PATH' is exported, input from its file.
 #   otherwise, input from stdin.
 #   how output the nested all requirements of Vim is as follows:
 # 
@@ -21,7 +21,7 @@ perl -e '
 # 
 # return:
 #   print the depended packages of given package name.
-#   return -1 if package name is not found in file $ENV{"SETUP_INI_FILE_PATH"}.
+#   return -1 if package name is not found in file $ENV{'SETUP_INI_FILE_PATH'}.
 # 
 
 use strict;
@@ -41,10 +41,10 @@ sub usage {
 # return the structure like:
 # 
 #     (
-#         "4ti2-debuginfo" => ["cygwin-debuginfo"],
-#         "a2ps"           => ["bash", "libiconv2", "libintl8", "libpaper1", ..., "cygwin"],
+#         '4ti2-debuginfo' => ['cygwin-debuginfo'],
+#         'a2ps'           => ['bash', 'libiconv2', 'libintl8', 'libpaper1', ..., 'cygwin'],
 #           :
-#         "zsh"            => ["cygwin", "libncursesw10", "libpcre1", "libiconv2", "libgdbm4", "_update-info-dir"]
+#         'zsh'            => ['cygwin', 'libncursesw10', 'libpcre1', 'libiconv2', 'libgdbm4', '_update-info-dir']
 #     )
 # 
 sub create_requirements_table {
@@ -52,7 +52,7 @@ sub create_requirements_table {
 
 	# select input (file or stdin)
 	my $in;
-	my $target_file = $ENV{"SETUP_INI_FILE_PATH"};
+	my $target_file = $ENV{'SETUP_INI_FILE_PATH'};
 	if ($target_file) {
 		open($in, "< $target_file") or die("could not open file \"$target_file\"");
 	} else {
@@ -90,7 +90,7 @@ sub fetch_pkg_depends {
 	my @requires = @{ $pkg_requirements_table->{$pkg_name} || [] };
 
 	# print "begin: $nest\n";
-	# print join(" ", keys %require_pkgs) . "\n";
+	# print join(' ', keys %require_pkgs) . "\n";
 
 	foreach (@requires) {
 		my $require_pkg = $_;
@@ -119,5 +119,6 @@ if (__FILE__ eq $0) {
 
 
 
-' -- $@
+EOC
+)" -- $@
 }
