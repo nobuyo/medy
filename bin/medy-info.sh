@@ -2,16 +2,18 @@
 
 function info-self {
   medy-version
-  
+
   setlab
-  where_mirror $mirror
-  where_dir $cache
+  echo -n "  " ;where_mirror $mirror
+  echo -n "  " ;where_dir $cache
+  exit 0
 }
 
 function medy-info {
-  if [ $# -eq 1 ]; then
+  if [ $# -eq 0 ]; then
     info-self
   fi
+
   setlab
 
   info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\

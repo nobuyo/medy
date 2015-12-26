@@ -66,11 +66,11 @@ function success {
 }
 
 function where_mirror {
-  echo "Mirror server is $1"
+  echo "Mirror server: $1"
 }
 
 function where_dir {
-  echo "Cache directory is $1"
+  echo "Cache directory: $1"
 }
 
 function cygwin_arch {
@@ -226,8 +226,20 @@ function usage {
   echo "  --version"
 }
 
+function info-self {
+  medy-version
+
+  setlab
+  echo -n "  " ;where_mirror $mirror
+  echo -n "  " ;where_dir $cache
+  exit 0
+}
+
 function medy-info {
-  checkpackages "$@"
+  if [ $# -eq 0 ]; then
+    info-self
+  fi
+
   setlab
 
   info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
