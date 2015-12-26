@@ -31,8 +31,7 @@ function verify-remove {
 
   local dontremove=(cygwin coreutils gawk bzip2 tar xz wget aria2 bash)
   local dontremovewithdep=()
-  reinstall=()
-
+  
   for dep in ${dontremove[@]}; do
     dontremovewithdep+="$(pkg-depends $dep) "
   done
@@ -45,7 +44,6 @@ function verify-remove {
       warn "medy cannot remove package $1, skipping"
       remove_skip=1
     elif [ $remove_skip = 0 ]; then
-      reinstall+="$1 "
       remove_skip=0
     fi
   done

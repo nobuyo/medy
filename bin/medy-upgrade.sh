@@ -6,16 +6,17 @@ function remove-to-upgrade {
     verify-remove $pkg
     if [ $remove_skip = 0 ]; then
       echo Removing: $pkg
+      reinstall+="$pkg "
 
-      # if [ -e "/etc/preremove/$pkg.sh" ]; then
-      #   "/etc/preremove/$pkg.sh"
-      # fi
+      if [ -e "/etc/preremove/$pkg.sh" ]; then
+        "/etc/preremove/$pkg.sh"
+      fi
 
-      # gzip -cd "/etc/setup/$pkg.lst.gz" | awk '/[^\/]$/ {print "rm -f \"/" $0 "\""}' | sh
-      # awk > /tmp/awk.$$ -v pkg="$pkg" '{if (pkg != $1) print $0}' /etc/setup/installed.db
-      # rm -f "/etc/postinstall/$pkg.sh.done" "/etc/preremove/$pkg.sh" "/etc/setup/$pkg.lst.gz"
-      # mv /etc/setup/installed.db /etc/setup/installed.db-save
-      # mv /tmp/awk.$$ /etc/setup/installed.db
+      gzip -cd "/etc/setup/$pkg.lst.gz" | awk '/[^\/]$/ {print "rm -f \"/" $0 "\""}' | sh
+      awk > /tmp/awk.$$ -v pkg="$pkg" '{if (pkg != $1) print $0}' /etc/setup/installed.db
+      rm -f "/etc/postinstall/$pkg.sh.done" "/etc/preremove/$pkg.sh" "/etc/setup/$pkg.lst.gz"
+      mv /etc/setup/installed.db /etc/setup/installed.db-save
+      mv /tmp/awk.$$ /etc/setup/installed.db
     fi
   done
   echo Done.
@@ -27,6 +28,7 @@ function medy-upgrade {
   getsetup
 
   target=()
+  reinstall=()
   archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db |\
   tail -n +2 )"
 
@@ -66,9 +68,8 @@ function medy-upgrade {
 
     echo Start Removing...
     remove-to-upgrade "$(echo ${target[@]})"
-    echo "${reinstall[@]}"
     echo Start Reinstalling...
-    # medy-install "$(echo ${reinstall[@]})"
+    medy-install "$(echo ${reinstall[@]})"
 
     # if [ $? = 0 ]; then
     #   rm $cache/$dir/$arch/medy-update-target.dat
