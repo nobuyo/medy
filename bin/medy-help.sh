@@ -17,7 +17,7 @@ function usage {
   echo "  \"medy upgrade-self\"             to upgrade medy"
   echo ""
   echo "Options:"
-  echo "  --force               : force install/remove/fetch trustedkeys"
+  echo "  --force               : force install/remove/"
   echo "  --mirror, -m <url>    : set mirror server"
   echo "  --view, -v            : show process info"
   echo "  --local               : find package from local"

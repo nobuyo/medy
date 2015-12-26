@@ -19,6 +19,8 @@ medy provides the following additional features as compared to the originals:
 - suggest subcommand if there were a typo
 
 ## Operations
+about subcommands and options
+### Subcommand
 ~~~ bash
 install
   Install package.
@@ -36,23 +38,49 @@ info
   Display information on given package.
 
 find|search
-  search given package from local and server.
+  Search given package from local and server.
   support an option --local to search from only local.
 
 upgrade
-  upgrade(remove and reinstall) all packages which has a update.
+  Upgrade(remove and reinstall) all packages which has a update.
 
 upgrade-self
-  get medy of the latest version.
+  Get medy of the latest version.
 
 doctor
-  checking all packages available.
+  Check all packages available.
 
 help
-  show usage and exit.
+  Show usage and exit.
 
 version
-  show logo and version info.
+  Show logo and version info.
+~~~
+
+### Options
+~~~ bash
+--force
+  Force install/remove.
+
+--mirror
+  Set mirror server.
+
+---view
+  Show process infomation.
+
+--local
+  Find package from local.
+
+--dry-run
+  Run without remove or install(only upgrade support).
+
+--help
+  Show help.
+
+--version
+  Show version. 
+
+
 ~~~
 
 ## for contributors
