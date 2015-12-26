@@ -20,6 +20,6 @@ recombine:
 	@$(MAKE) combine
 
 deploy:
-	cp -f $BUILD_FILE /bin/medy
+	cp -f $(BUILD_FILE) /bin/medy
 	chmod +x /bin/medy
 
