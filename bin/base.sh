@@ -93,7 +93,7 @@ do
       shift
     ;;
 
-    --view|-v)
+    --view)
       noisy_view=1
       shift
     ;;

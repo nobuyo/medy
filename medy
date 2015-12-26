@@ -185,7 +185,7 @@ function medy-doctor {
   local pkg
   local ready=1
 
-  echo -n "Checking...."
+  echo "Checking...."
 
   for pkg in $installed;
   do
@@ -197,7 +197,9 @@ function medy-doctor {
   done
 
   if [ "$ready" = 1 ]; then
-    echo "doctor: Your system is healty, ready to medy"
+    echo "Your system is healty, ready to medy"
+  else
+    
   fi
 }
 
@@ -1087,7 +1089,7 @@ do
       shift
     ;;
 
-    --view|-v)
+    --view)
       noisy_view=1
       shift
     ;;

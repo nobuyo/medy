@@ -19,6 +19,8 @@ function medy-doctor {
   done
 
   if [ "$ready" = 1 ]; then
-    echo "doctor: Your system is healty, ready to medy"
+    echo "Your system is healty, ready to medy"
+  else
+    
   fi
 }
