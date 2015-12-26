@@ -611,11 +611,9 @@ function medy-update {
   local dif="$(diff -u /tmp/medylist-save /tmp/medylist)"
 
   if [ ! -z "$dif" ]; then
-    echo -e "\033[33m==>New package\033[m"
+    # if there were some changes => disp pkg name
+    echo -e "\033[33m==>Updated package\033[m"
     echo "$dif" | grep '^\+\s' | sed -e 's/\+ //g'
-
-    echo -e "\033[33m==>Deleted package\033[m"
-    echo "$dif"| grep '^-\s' | sed -e 's/- //g'
   else
     echo "setup.ini already latest version"
   fi
