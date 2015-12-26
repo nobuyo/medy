@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# apt-cyg: install tool for cygwin similar to debian apt-get
+# medy: package manager for Cygwin
 
 # The MIT License (MIT)
 #
-# Copyright (c) 2013 Trans-code Design
+# Copyright (c) 2015-2016 nobuyo
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -605,10 +605,20 @@ function medy-uninstall {
 
 function medy-update {
   setlab
-  local previous="$(grep "^@" $cache/$dir/$arch/setup.ini-save | tr -d '@')"
+  grep "^@" $cache/$dir/$arch/setup.ini-save | tr -d '@' > /tmp/medylist-save
   getsetup
-  local current="$(grep "^@" $cache/$dir/$arch/setup.ini | tr -d '@')"
-  diff "$previous" "$current"
+  grep "^@" $cache/$dir/$arch/setup.ini | tr -d '@' > /tmp/medylist
+  local dif="$(diff -u /tmp/medylist-save /tmp/medylist)"
+
+  echo "$dif"
+
+  if [ ! -z "$dif" ]; then
+    echo -e "\033[33m==>New package\033[m"
+    echo "$dif" | grep '^\+\s' | sed -e 's/\+ //g'
+
+    echo -e "\033[33m==>Deleted package\033[m"
+    echo "$dif"| grep '^-\s' | sed -e 's/- //g'
+  fi
 }
 
 
