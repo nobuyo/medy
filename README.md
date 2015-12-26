@@ -1,5 +1,5 @@
 # medy
-package manager for cygwin(developing, not yet available)
+package manager for cygwin(beta version)
 
 ## requires
 medy requires the cygwin default environment and optional packages below.
@@ -17,6 +17,43 @@ medy provides the following additional features as compared to the originals:
 - showing infomation and status of package
 - upgrade(remove and install) packages
 - suggest subcommand if there were a typo
+
+## Operations
+~~~ bash
+install
+  Install package.
+
+remove|uninstall
+  Remove package from the system.
+
+update
+  Download a copy of the master package list from the mirror server.
+
+list
+  Show package list on the system.
+
+info
+  Display information on given package.
+
+find|search
+  search given package from local and server.
+  support an option --local to search from only local.
+
+upgrade
+  upgrade(remove and reinstall) all packages which has a update.
+
+upgrade-self
+  get medy of the latest version.
+
+doctor
+  checking all packages available.
+
+help
+  show usage and exit.
+
+version
+  show logo and version info.
+~~~
 
 ## for contributors
 ####file description
