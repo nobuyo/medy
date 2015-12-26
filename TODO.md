@@ -13,7 +13,7 @@
 
 ## add function
 - [ ] display the difference on update setup.ini
-- [ ] usable cURL
+- [ ] Optimize download
 - [x] Subcommand Completion
 	* [ ] more spelling patterns
 - [ ] display Progress bar
