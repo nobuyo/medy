@@ -4,11 +4,11 @@
 - [ ] installation with symbolic link
 - [ ] installation each version
 
-## implementions
+## implementations
 - [ ] implement "clean"
 - [ ] implement "doctor"
 	* [ ] medy version check
-	* [ ] check local files and installed.db
+	* [x] check packeages available
 - [ ] implement "build"
 
 ## add function
@@ -20,5 +20,5 @@
 
 ## refactoring
 - [x] update version info
-- [ ] change OUTPUT file(./bin/medy => ./medy)
+- [x] change OUTPUT file(./bin/medy => ./medy)
 - [x] localize loop intex 
