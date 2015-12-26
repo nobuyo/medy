@@ -87,7 +87,7 @@ version
 ~~~
 
 ## Quick start
-get it, deploy it, and make it executable.
+please get it, deploy it, and make it executable.
 ~~~ bash
 $ mv medy /bin/medy
 $ chmod +x /bin/medy
