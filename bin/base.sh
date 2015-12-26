@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# apt-cyg: install tool for cygwin similar to debian apt-get
+# medy: package manager for Cygwin
 
 # The MIT License (MIT)
 #
-# Copyright (c) 2013 Trans-code Design
+# Copyright (c) 2015-2016 nobuyo
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
