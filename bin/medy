@@ -509,6 +509,7 @@ function verify-remove {
 
   local dontremove=(cygwin coreutils gawk bzip2 tar xz wget aria2 bash)
   local dontremovewithdep=()
+  reinstall=()
 
   for dep in ${dontremove[@]}; do
     dontremovewithdep+="$(pkg-depends $dep) "
@@ -522,6 +523,7 @@ function verify-remove {
       warn "medy cannot remove package $1, skipping"
       remove_skip=1
     elif [ $remove_skip = 0 ]; then
+      reinstall+=$1
       remove_skip=0
     fi
   done
@@ -697,7 +699,7 @@ function medy-upgrade {
     echo Start Removing...
     remove-to-upgrade "$(echo ${target[@]})"
     echo Start Reinstalling...
-    medy-install "$(echo ${target[@]})"
+    medy-install "$(echo ${reinstall[@]})"
 
     # if [ $? = 0 ]; then
     #   rm $cache/$dir/$arch/medy-update-target.dat
