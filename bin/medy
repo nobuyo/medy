@@ -735,7 +735,7 @@ medylogo="
 "
 function medy-version {
   echo -e "$medylogo"
-  echo "  version 0.5.0"
+  echo "  version 0.5.3"
 }
 #> cat ./bin/perl-module/*.sh | perl -ne 'print unless /^#!/'
 
