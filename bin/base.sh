@@ -170,6 +170,10 @@ function suggest_subcommand {
       CORRECT="upgrade-self"
       ;;
 
+    varsion|vertion)
+      CORRECT="version"
+      ;;
+
     *)
       exit 1
       ;;
