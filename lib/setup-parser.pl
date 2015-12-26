@@ -43,12 +43,12 @@ sub usage {
 sub format_pkg_all_info {
 	my ($pkg_info) = @_;
 	my @each_lines = (
-		"sdesc: $pkg_info->{'sdesc'}",
-		"ldesc: \n" . join('', @{$pkg_info->{'ldesc'}}),
-		"category: $pkg_info->{'category'}",
-		"requires: $pkg_info->{'requires'}",
-		"version: $pkg_info->{'version'}",
-		"install: $pkg_info->{'install'}",
+		"sdesc: "    . $pkg_info->{'sdesc'},
+		"ldesc: \n"  . join("", @{ $pkg_info->{'ldesc'} }),
+		"category: " . $pkg_info->{'category'},
+		"requires: " . $pkg_info->{'requires'},
+		"version: "  . $pkg_info->{'version'},
+		"install: "  . $pkg_info->{'install'},
 		"" # ends with \n
 	);
 	return join("\n", @each_lines);
@@ -62,7 +62,7 @@ sub format_pkg_info {
 	}
 
 	if (ref $pkg_info->{$tag} eq 'ARRAY') {
-		return join('', @{$pkg_info->{$tag}})
+		return join('', @{$pkg_info->{$tag}});
 	} else {
 		return "$pkg_info->{$tag}\n";
 	}
@@ -96,7 +96,7 @@ sub extract_from_setup_init {
 	if ($target_file) {
 		open($in, "< $target_file") or die("could not open file \"$target_file\"");
 	} else {
-		$in = *STDIN
+		$in = *STDIN;
 	}
 
 	while (<$in>) {
