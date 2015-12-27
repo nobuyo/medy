@@ -8,6 +8,6 @@ function medy-upgrade-self {
     mv $lab_dir/medy.orig $medy
   fi
 
-  chmod 775 $medy
+  chmod +x $medy
   success "Updated medy"
 }
