@@ -12,7 +12,7 @@ medy requires the cygwin default environment and optional packages below.
 - wget
 
 ## How differ?
-medy provides the following additional features as compared to the originals:
+medy provides the following additional features as compared to the [originals](https://github.com/nobuyo/medy#official):
 
 - showing infomation and status of package
 - upgrade(remove and install) packages
