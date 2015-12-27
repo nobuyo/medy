@@ -26,7 +26,7 @@ $ medy <SUBCOMMAND> <OPTION> <ARGS>
 ~~~
 
 ### Subcommand
-~~~ bash
+~~~
 install
   Install package.
 
@@ -63,7 +63,7 @@ version
 ~~~
 
 ### Options
-~~~ bash
+~~~
 --force
   Force install/remove.
 
