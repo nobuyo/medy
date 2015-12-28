@@ -88,7 +88,7 @@ do
       shift
     ;;
 
-    --dry-run)
+    --dry-run|-n)
       DRY_RUN=1
       shift
     ;;
