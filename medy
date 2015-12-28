@@ -558,7 +558,7 @@ function remove-dep {
 
   echo Following packages will be removed:
   echo ${REMOVE[@]}
-  ask_user "Do you wish to continue?" || exit
+  ask_user "\033[33mDo you wish continue?\033[m" || exit
 
   for pkg in ${REMOVE[@]};
   do
