@@ -124,12 +124,12 @@ do
   if [ -f "$file" ]; then
     readarray -t -O ${#ARGS[@]} ARGS < "$file"
   else
-    warning "File $file not found, skipping"
+    warn "File $file not found, skipping"
   fi
 done
 
 if [ `cygwin_arch` = "x86" ]; then
-  warning "x86 env detected: aria2 can't use --conditional-get, always download and overwrite"
+  warn "x86 env detected: aria2 can't use --conditional-get, always download and overwrite"
   ARIA2C=( "aria2c" "--allow-overwrite=true" )
 else
   ARIA2C=( "aria2c" "--conditional-get" "--allow-overwrite" )

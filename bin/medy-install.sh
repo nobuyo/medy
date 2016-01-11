@@ -13,7 +13,7 @@ function medy-install {
   for pkg do
     local already="$(grep -c "^$pkg " /etc/setup/installed.db)"
     if [ $already -ge 1 ] && [ -z $force ]; then
-      warning "Package $pkg is already installed, skipping"
+      warn "Package $pkg is already installed, skipping"
       continue
     fi
     CURRENT="${CURRENT[@]} $pkg"
