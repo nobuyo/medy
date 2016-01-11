@@ -1,8 +1,7 @@
 # TODO
 
 ## Conversion the policy
-- [ ] installation with symbolic link
-- [ ] installation each version
+- recommend using [crew](https://github.com/TeX2e/crew)
 
 ## implementations
 - [ ] implement "clean"
@@ -21,4 +20,7 @@
 ## refactoring
 - [x] update version info
 - [x] change OUTPUT file(./bin/medy => ./medy)
-- [x] localize loop intex 
+- [x] localize loop intex
+
+## bug fix
+- [ ] fix mirror URL

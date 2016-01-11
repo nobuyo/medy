@@ -68,7 +68,7 @@ function get {
 function setlab {
   # get mirror and cache dir from local
   #default
-  mirror=ftp://ftp.iij.ad.jp/pub/cygwin
+  mirror=ftp://ftp.iij.ad.jp/pub/cygwin/
   cache=~/medycache
   arch="$(cygwin_arch)"
 
@@ -78,7 +78,7 @@ function setlab {
     mirror="$(awk '/last-mirror/ {getline; print $1}' /etc/setup/setup.rc)"
   fi
 
-  dir="$(encode_mirror_url "$mirror/")"
+  dir="$(encode_mirror_url "$mirror")"
 
   if [ -e /etc/setup/last-cache ]; then
     cache="$(cygpath -au "$(head -1 /etc/setup/last-mirror)")"
@@ -91,8 +91,8 @@ function setlab {
     where_dir $cache
   fi
 
-  mkdir -p "$cache/$dir/$arch"
-  cd "$cache/$dir/$arch"
+  mkdir -p "$cache/$dir$arch"
+  cd "$cache/$dir$arch"
   if [ -e setup.ini ]; then
     export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
     return 0
@@ -106,7 +106,7 @@ function setlab {
 function getsetup {
   touch setup.ini
   mv setup.ini setup.ini-save
-  get -N $mirror/$arch/setup.bz2
+  get -N $mirror$arch/setup.bz2
   if [ -e setup.bz2 ]; then
     bunzip2 setup.bz2
     mv setup setup.ini
