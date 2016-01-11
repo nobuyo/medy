@@ -55,10 +55,7 @@ function medy-upgrade {
   target=()
   reinstall=()
 
-  if [ $# == 1 ]; then
-    archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | grep "$1")"
-    echo $archive
-  elif [ $# -gt 1 ]; then
+  if [ $# -gt 1 ]; then
     local s
     local search_list=()
     search_list+="^$1,"
@@ -68,6 +65,16 @@ function medy-upgrade {
       search_list+="\|^$s,"
     done
     archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | grep ${search_list[@]} )"
+    if [ "${archive[@]}" = "" ]; then
+      error "Given packages not installed, exiting"
+      exit 1
+    fi
+  elif [ $# -gt 0 ]; then
+    archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | grep "$1")"
+    if [ "${archive[@]}" = "" ]; then
+      error "Given package does not installed, exiting"
+      exit 1
+    fi
   else
     archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | tail -n +2 )"
   fi
