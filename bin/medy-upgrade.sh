@@ -54,8 +54,23 @@ function medy-upgrade {
 
   target=()
   reinstall=()
-  archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db |\
-  tail -n +2 )"
+
+  if [ $# == 1 ]; then
+    archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | grep "$1")"
+    echo $archive
+  elif [ $# -gt 1 ]; then
+    local s
+    local search_list=()
+    search_list+="^$1,"
+    shift
+    for s in "$@";
+    do
+      search_list+="\|^$s,"
+    done
+    archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | grep ${search_list[@]} )"
+  else
+    archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | tail -n +2 )"
+  fi
 
   if [ ! -e $cache/$dir$arch/setup.ini ]; then
     error "File not found: 'setup.ini', exiting"
@@ -87,7 +102,11 @@ function medy-upgrade {
 
   sed -i '$d' $cache/$dir$arch/setup.ini
 
-  if [ $DRY_RUN != 1 ]; then
+  if [ $DRY_RUN = 1 ]; then
+    exit 0
+  elif [[ "${target[@]}" = "" ]]; then
+    echo -e "\033[35mNo Package(s) update, done.\033[m"
+  else
     echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
     # backup
