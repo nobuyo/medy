@@ -66,13 +66,13 @@ function medy-upgrade {
     done
     archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | grep ${search_list[@]} )"
     if [ "${archive[@]}" = "" ]; then
-      error "Given packages not installed, exiting"
+      error "Given packages \"${archive[@]}\" not installed, exiting"
       exit 1
     fi
   elif [ $# -gt 0 ]; then
     archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | grep "$1")"
     if [ "${archive[@]}" = "" ]; then
-      error "Given package does not installed, exiting"
+      error "Given package \"${archive[@]}\" does not installed, exiting"
       exit 1
     fi
   else
