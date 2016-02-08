@@ -132,6 +132,7 @@ function setlab {
   if [ $noisy_view = 1 ]; then
     where_mirror $mirror
     where_dir $cache
+    echo $arch
   fi
 
   mkdir -p "$cache/$dir$arch"
@@ -1139,7 +1140,7 @@ do
       shift
     ;;
 
-    --view)
+    --view|-v)
       noisy_view=1
       shift
     ;;
