@@ -1,7 +1,5 @@
 # TODO
 
-## Conversion the policy
-
 ## implementations
 - [ ] implement "clean"
 - [ ] implement "doctor"
