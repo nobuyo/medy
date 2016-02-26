@@ -106,11 +106,18 @@ $ medy install nano
 4. Push to the branch (git push origin my-new-feature)
 5. Create a new Pull Request
 
-####file description
+#### file description
 filename(assumed dir) ... desc
 - setup.ini(Cygwin packages folder each Machine) ... provide packages infomation
 - installed.db(/etc/setup/installed.db) ... list of installed package on each Cygwin
 - setup.rc(/etc/setup/setup.rc) ... infomation of mirror, last mirror, and cache directory
+
+#### build medy
+
+On our terminal:
+~~~ bash
+path/to/medy$ make
+~~~
 
 #### Implementation plan
 - [TODO](https://github.com/nobuyo/medy/blob/master/TODO.md)
