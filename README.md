@@ -70,7 +70,7 @@ version
 --mirror
   Set mirror server.
 
----view
+--view
   Show process infomation.
 
 --local

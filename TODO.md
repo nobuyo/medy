@@ -1,7 +1,6 @@
 # TODO
 
 ## Conversion the policy
-- recommend using [crew](https://github.com/TeX2e/crew)
 
 ## implementations
 - [ ] implement "clean"
@@ -14,13 +13,11 @@
 - [ ] display the difference on update setup.ini
 - [ ] Optimize download
 - [x] Subcommand Completion
-	* [ ] more spelling patterns
-- [ ] display Progress bar
 
 ## refactoring
 - [x] update version info
 - [x] change OUTPUT file(./bin/medy => ./medy)
-- [x] localize loop intex
+- [x] localize loop index
 
 ## bug fix
 - [ ] fix mirror URL
