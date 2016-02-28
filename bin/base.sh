@@ -93,7 +93,7 @@ do
       shift
     ;;
 
-    --view|-v)
+    --verbose|-v)
       noisy_view=1
       shift
     ;;
