@@ -756,7 +756,7 @@ function medy-upgrade {
 
 function medy-upgrade-self {
   mv $medy $lab_dir/medy.orig
-  get -O $lab_dir/medy "https://raw.githubusercontent.com/nobuyo/medy/master/medy"
+  get -O $medy "https://raw.githubusercontent.com/nobuyo/medy/master/medy"
   if [ $? -ne 0 ]; then
     error "medy Could not found, reverting"
     mv $lab_dir/medy.orig $medy
