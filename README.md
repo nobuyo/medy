@@ -26,40 +26,42 @@ $ medy <SUBCOMMAND> <OPTION> <ARGS>
 ~~~
 
 ### Subcommand
-- install
+~~~
+install
   Install package.
 
-- remove|uninstall
+remove|uninstall
   Remove package from the system.
 
-- update
+update
   Download a copy of the master package list from the mirror server.
 
-- list
+list
   Show package list on the system.
 
-- info
+info
   Display information on given package.
 
-- find|search
-  Search given package from local and server.  
+find|search
+  Search given package from local and server.
   support an option --local to search from only local.
 
-- upgrade
-  Upgrade(remove and reinstall) package(s) which has a update.
+upgrade
+  Upgrade(remove and reinstall) package(s).
+  If no packages given as argument, medy upgrades all packages which has a update.
 
-- upgrade-self
+upgrade-self
   Get medy of the latest version.
 
-- doctor
+doctor
   Check all packages available.
 
-- help
+help
   Show usage and exit.
 
-- version
+version
   Show logo and version info.
-
+~~~
 
 ### Options
 ~~~
