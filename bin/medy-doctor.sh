@@ -12,7 +12,7 @@ function medy-doctor {
   for pkg in $installed;
   do
     is-available $pkg || { #medy-info $pkg &>/dev/null || {
-        echo; echo "$pkg is not available"
+        echo "$pkg is not available"
         ready=0
     }
   done
@@ -21,7 +21,8 @@ function medy-doctor {
     echo -e "\033[32mOK!\033[m"
   fi
 
-    echo -n "Checking update.... "
+  echo -n "Checking update.... "
+  ready=1
 
   wget -q https://raw.githubusercontent.com/nobuyo/medy/master/medy -O - |\
    ( cat $medy | diff /dev/fd/3 -) 3<&0 &>/dev/null ||
