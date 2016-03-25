@@ -48,11 +48,15 @@ function medy-info {
   echo -e "\033[35;4m Version \033[m"""
   echo "$info_version"
 
+  local status
   echo -e "\033[35;4m Status \033[m"""
   grep "^$1" /etc/setup/installed.db &> /dev/null
   if [ $? -eq 0 ]; then
     echo "Installed (${current_version%.*.*})"
+    status=0
   else
     echo "Not installed"
+    status=1
   fi
+  return $status
 }
