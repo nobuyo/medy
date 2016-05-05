@@ -120,7 +120,6 @@ On our terminal:
 path/to/medy$ make
 ~~~
 
-
 ## Official
 This script heavy based on these scripts:
 - [apt-cyg](https://github.com/transcode-open/apt-cyg)
