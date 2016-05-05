@@ -120,8 +120,6 @@ On our terminal:
 path/to/medy$ make
 ~~~
 
-#### Implementation plan
-- [TODO](https://github.com/nobuyo/medy/blob/master/TODO.md)
 
 ## Official
 This script heavy based on these scripts:
