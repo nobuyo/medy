@@ -79,12 +79,12 @@ function medy-upgrade {
     archive="$(awk 'BEGIN { OFS="," } {print $1, $2}' /etc/setup/installed.db | tail -n +2 )"
   fi
 
-  if [ ! -e $cache/$dir$arch/setup.ini ]; then
+  if [ ! -e $cache/$dir/$arch/setup.ini ]; then
     error "File not found: 'setup.ini', exiting"
     exit 1
   fi
 
-  echo "@ " >> $cache/$dir$arch/setup.ini
+  echo "@ " >> $cache/$dir/$arch/setup.ini
 
   echo -e "\033[36;4mChecking package update...\033[m"
   for acv in $archive;
@@ -95,7 +95,7 @@ function medy-upgrade {
     # tarcurrent="$(grep -wA22 "^@ $pkgname" $cache/$dir/$arch/setup.ini |\
     #   sed -e 's/^@\s//' | sed '/@/,$d'| sed '/prev/,$d' |\
     #   grep 'install: ' | sed -e 's/install: //g' | awk '{print $1}')"
-    tarcurrent="$(perl -ne 'print if /^@ \Q$ENV{pkgname}\E\n/.../^@ /' $cache/$dir$arch/setup.ini |\
+    tarcurrent="$(perl -ne 'print if /^@ \Q$ENV{pkgname}\E\n/.../^@ /' $cache/$dir/$arch/setup.ini |\
       sed '$d' | sed '/prev/,$d' | grep 'install: ' |\
       sed -e 's/install: //g' | awk '{print $1}')"
     infocurrent="${tarcurrent##*/}"
@@ -107,7 +107,7 @@ function medy-upgrade {
     fi
   done
 
-  sed -i '$d' $cache/$dir$arch/setup.ini
+  sed -i '$d' $cache/$dir/$arch/setup.ini
 
   if [ $DRY_RUN = 1 ]; then
     exit 0
@@ -117,7 +117,7 @@ function medy-upgrade {
     echo -e;  ask_user "\033[33mDo you wish upgrade?\033[m" || exit 1
 
     # backup
-    echo ${target[@]} > $cache/$dir$arch/medy-update-target.dat
+    echo ${target[@]} > $cache/$dir/$arch/medy-update-target.dat
 
     # TODO
     # implement resume-upgrade

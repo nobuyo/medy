@@ -15,9 +15,9 @@ function medy-info {
   fi
 
   setlab
-  export SETUP_INI_FILE_PATH=$cache/$dir$arch/setup.ini
+  export SETUP_INI_FILE_PATH=$cache/$dir/$arch/setup.ini
 
-  local info="$(grep -wA10 "^@ $1$" $cache/$dir$arch/setup.ini |\
+  local info="$(grep -wA10 "^@ $1$" $cache/$dir/$arch/setup.ini |\
   sed -e 's/^@\s//g' |\
   grep -v 'ldesc\|install:\|source:' |\
   sed '/prev/,+2d' |\
